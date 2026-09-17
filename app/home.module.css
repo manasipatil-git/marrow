@@ -1,0 +1,185 @@
+/* Home screen styles — migrated faithfully from reference/prototype.html */
+.home {
+  --cream-deep: #F3E9D8;
+  --coral-tint: #F3DCD5;
+  --sage-tint: #E1EADD;
+  --butter-tint: #FBF1D6;
+  --peri-tint: #E4E6F5;
+  --shadow-soft: 0 6px 18px rgba(90, 70, 45, 0.10);
+  --shadow-card: 0 3px 10px rgba(90, 70, 45, 0.08);
+  --radius-lg: 26px;
+  --radius-md: 18px;
+
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--cream);
+  overflow: hidden;
+}
+
+.homeHeader {
+  padding: 24px 22px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.homeGreeting { font-size: 22px; font-weight: 600; color: var(--ink); }
+.homeDate { font-size: 12.5px; color: var(--ink-faint); margin-top: 2px; }
+.headerRight { display: flex; align-items: center; gap: 8px; }
+.streakChip {
+  display: flex; align-items: center; gap: 4px;
+  background: #fff; border: 1px solid var(--paper-border);
+  padding: 7px 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; color: var(--ink);
+  box-shadow: var(--shadow-card); cursor: pointer;
+}
+.searchPill {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: #fff; border: 1px solid var(--paper-border);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-card); cursor: pointer;
+  color: var(--ink-soft);
+}
+.homeScroll { padding: 0 22px 140px; }
+
+.missionCard {
+  background: linear-gradient(135deg, #fff 0%, var(--peri-tint) 130%);
+  border: 1px solid #DADDF0;
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  transform: rotate(0.5deg);
+}
+.missionLabel {
+  font-family: var(--font-hand);
+  font-size: 18px; font-weight: 600; color: #454E7C;
+  margin-bottom: 8px; display: block;
+}
+.missionSteps { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.missionStep { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-soft); }
+.missionStepDot { width: 6px; height: 6px; border-radius: 50%; background: var(--periwinkle); flex-shrink: 0; }
+.missionGoBtn {
+  background: #454E7C; color: #fff;
+  font-size: 13px; font-weight: 600;
+  padding: 10px 20px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+.continueCard {
+  background: linear-gradient(135deg, #fff 0%, var(--butter-tint) 100%);
+  border-radius: var(--radius-lg);
+  padding: 22px 22px 20px;
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  margin-bottom: 26px;
+  border: 1px solid #F0E4C8;
+  cursor: pointer;
+  transform: rotate(-0.6deg);
+}
+.continueLabel {
+  font-family: var(--font-hand);
+  font-size: 19px; font-weight: 600;
+  color: var(--coral-deep);
+  margin-bottom: 10px; display: block;
+}
+.continueTitle { font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.continueMeta { font-size: 13px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+.continueArrow {
+  position: absolute; top: 20px; right: 20px;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--coral); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+
+.sectionLabel {
+  font-family: var(--font-hand);
+  font-size: 19px; font-weight: 600;
+  color: var(--ink);
+  margin: 4px 0 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.countBadge {
+  font-family: var(--font-sans);
+  font-size: 11px; font-weight: 600;
+  background: var(--coral-tint); color: var(--coral-deep);
+  padding: 2px 9px; border-radius: 20px;
+}
+
+.revisitRow { display: flex; gap: 12px; margin-bottom: 30px; }
+.revisitCard {
+  flex: 1;
+  background: #fff;
+  border-radius: var(--radius-md);
+  padding: 16px 14px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--paper-border);
+  cursor: pointer;
+}
+.revisitCard:nth-child(1) { transform: rotate(-1deg); }
+.revisitCard:nth-child(2) { transform: rotate(1deg); }
+.revisitDot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 10px; }
+.revisitTitle { font-size: 14.5px; font-weight: 600; color: var(--ink); margin-bottom: 5px; }
+.revisitStatus { font-size: 12px; color: var(--ink-soft); }
+
+.sessionRow {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 4px;
+  border-bottom: 1px solid var(--cream-deep);
+  cursor: pointer;
+}
+.sessionRow:last-child { border-bottom: none; }
+.sessionIcon {
+  width: 42px; height: 42px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.sessionTitle { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.sessionSub { font-size: 12px; color: var(--ink-faint); margin-top: 2px; }
+.sessionChev { margin-left: auto; color: var(--ink-faint); }
+
+.surpriseCard {
+  background: linear-gradient(135deg, #fff 0%, var(--butter-tint) 130%);
+  border: 1px solid #F0E4C8;
+  border-radius: var(--radius-md);
+  padding: 15px 17px; margin-top: 16px;
+  cursor: pointer;
+}
+.surpriseEyebrow { font-family: var(--font-hand); font-size: 16px; font-weight: 600; color: #8A6A1F; margin-bottom: 6px; display: block; }
+.surpriseBody { font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+.surpriseBody b { color: var(--ink); }
+
+.fab {
+  position: absolute;
+  bottom: 92px; left: 50%; transform: translateX(-50%);
+  background: var(--coral); color: #fff;
+  padding: 15px 26px;
+  border-radius: 999px;
+  display: flex; align-items: center; gap: 9px;
+  font-weight: 600; font-size: 15px;
+  box-shadow: 0 10px 26px rgba(201, 111, 92, 0.42);
+  cursor: pointer;
+  z-index: 30;
+  white-space: nowrap;
+}
+
+.bottomNav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 78px;
+  background: rgba(251, 246, 237, 0.92);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--paper-border);
+  display: flex; align-items: center; justify-content: space-around;
+  padding-bottom: 14px;
+  z-index: 50;
+}
+.navItem {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; color: var(--ink-faint);
+  font-size: 10.5px; font-weight: 500;
+  width: 64px;
+}
+.navItemActive { color: var(--coral-deep); }
+.navItem svg { width: 22px; height: 22px; }
