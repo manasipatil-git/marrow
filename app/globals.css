@@ -3,17 +3,45 @@
 :root {
   --background: #FBF6ED;
   --foreground: #2E2A26;
+
+  /* Marrow palette */
+  --cream: #FBF6ED;
+  --cream-deep: #F3E9D8;
+  --ink: #2E2A26;
+  --ink-soft: #5B5650;
+  --ink-faint: #948C7F;
+  --coral: #C96F5C;
+  --coral-deep: #B65B48;
+  --sage: #8FA88C;
+  --butter: #E8C468;
+  --periwinkle: #8B95C9;
+  --sketch-blue: #5B76B7;
+  --paper-border: #E4D8C3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-poppins);
+  --font-hand: var(--font-caveat);
+
+  /* expose Marrow colors as Tailwind utilities (bg-cream, text-ink, etc.) */
+  --color-cream: var(--cream);
+  --color-cream-deep: var(--cream-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-coral: var(--coral);
+  --color-coral-deep: var(--coral-deep);
+  --color-sage: var(--sage);
+  --color-butter: var(--butter);
+  --color-periwinkle: var(--periwinkle);
+  --color-sketch-blue: var(--sketch-blue);
+  --color-paper-border: var(--paper-border);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
 }
