@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Marrow — Listen once. Understand it. Remember it.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Fallback stacks used if the Google Fonts request is blocked (e.g. offline preview).
+     In any normal browser with internet access, Poppins/Caveat load above and take priority. */
+  :root{
+    --cream: #FBF6ED;
+    --cream-deep: #F3E9D8;
+    --ink: #2E2A26;
+    --ink-soft: #5B5650;
+    --ink-faint: #948C7F;
+    --coral: #C96F5C;
+    --coral-deep: #B65B48;
+    --coral-tint: #F3DCD5;
+    --sage: #8FA88C;
+    --sage-tint: #E1EADD;
+    --butter: #E8C468;
+    --butter-tint: #FBF1D6;
+    --periwinkle: #8B95C9;
+    --peri-tint: #E4E6F5;
+    --paper-border: #E4D8C3;
+    --shadow-soft: 0 6px 18px rgba(90, 70, 45, 0.10);
+    --shadow-card: 0 3px 10px rgba(90, 70, 45, 0.08);
+    --radius-lg: 26px;
+    --radius-md: 18px;
+    --radius-sm: 12px;
+    --font-ui: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-hand: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive, sans-serif;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: var(--font-ui);
+    background: #E9E2D3;
+    color: var(--ink);
+    height: 100%;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  /* ============ DEVICE FRAME ============ */
+  .stage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 12px;
+  }
+  .device {
+    position: relative;
+    width: 390px;
+    height: 844px;
+    max-height: 94vh;
+    background: var(--cream);
+    border-radius: 46px;
+    box-shadow: 0 30px 70px rgba(40, 30, 15, 0.35), 0 0 0 10px #1c1a18, 0 0 0 12px #3a3630;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .notch {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 26px;
+    background: #1c1a18;
+    border-radius: 0 0 18px 18px;
+    z-index: 100;
+  }
+  .screen-wrap {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+  }
+  .screen {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(24px);
+    transition: opacity 0.32s ease, transform 0.32s ease;
+    background: var(--cream);
+    padding-top: 44px;
+  }
+  .screen::-webkit-scrollbar{ display:none; }
+  .screen.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+    z-index: 5;
+  }
+
+  /* subtle paper grain overlay */
+  .grain {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+    z-index: 1;
+  }
+
+  /* ============ SHARED TYPE ============ */
+  h1, h2, h3 { margin: 0; font-family: var(--font-ui); font-weight: 600; }
+  p { margin: 0; }
+  .hand {
+    font-family: var(--font-hand);
+    font-weight: 600;
+    color: var(--coral-deep);
+  }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 22px 10px;
+  }
+  .back-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #fff; border: 1px solid var(--paper-border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: var(--shadow-card);
+    color: var(--ink-soft);
+    transition: transform 0.15s ease;
+  }
+  .back-btn:active { transform: scale(0.9); }
+  .topbar-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+  .topbar-spacer { width: 36px; }
+
+  /* ============ BUTTONS ============ */
+  .btn {
+    font-family: var(--font-ui);
+    border: none; cursor: pointer;
+    border-radius: 999px;
+    font-weight: 600;
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s ease;
+    -webkit-user-select: none; user-select: none;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary {
+    background: var(--coral);
+    color: #fff;
+    padding: 16px 28px;
+    font-size: 16px;
+    box-shadow: 0 8px 20px rgba(201, 111, 92, 0.35);
+    width: 100%;
+  }
+  .btn-primary:active { background: var(--coral-deep); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1.5px solid var(--paper-border);
+    padding: 13px 24px;
+    font-size: 15px;
+    width: 100%;
+  }
+  .btn-secondary:active { background: var(--cream-deep); }
+  .btn-ghost {
+    background: none; color: var(--ink-faint); font-size: 14px; padding: 8px;
+  }
+
+  /* ============ SECTION 1: ONBOARDING ============ */
+  #screen-onboarding { padding-top: 0; }
+  .onb-track {
+    display: flex; height: 100%;
+    transition: transform 0.4s cubic-bezier(.65,0,.35,1);
+  }
+  .onb-slide {
+    min-width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 36px 120px;
+    text-align: center;
+    position: relative;
+  }
+  .onb-illo {
+    width: 168px; height: 168px;
+    margin-bottom: 36px;
+    position: relative;
+  }
+  .onb-title {
+    font-family: var(--font-hand);
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.25;
+    margin-bottom: 14px;
+    max-width: 280px;
+  }
+  .onb-sub {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    max-width: 260px;
+  }
+  .onb-dots {
+    position: absolute;
+    bottom: 92px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 8px;
+  }
+  .onb-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--paper-border);
+    transition: all 0.25s ease;
+  }
+  .onb-dot.active { background: var(--coral); width: 20px; border-radius: 4px; }
+  .onb-footer {
+    position: absolute; bottom: 28px; left: 24px; right: 24px;
+  }
+  .onb-skip {
+    position: absolute; top: 20px; right: 24px;
+    font-size: 13px; color: var(--ink-faint);
+    cursor: pointer; z-index: 20; padding: 8px;
+  }
+
+  /* ============ SECTION 2: HOME ============ */
+  .home-header {
+    padding: 6px 22px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .home-greeting { font-size: 22px; font-weight: 600; color: var(--ink); }
+  .home-date { font-size: 12.5px; color: var(--ink-faint); margin-top: 2px; }
+  .search-pill {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: #fff; border: 1px solid var(--paper-border);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-card); cursor: pointer;
+    color: var(--ink-soft);
+  }
+  .home-scroll { padding: 0 22px 140px; }
+
+  .continue-card {
+    background: linear-gradient(135deg, #fff 0%, var(--butter-tint) 100%);
+    border-radius: var(--radius-lg);
+    padding: 22px 22px 20px;
+    box-shadow: var(--shadow-soft);
+    position: relative;
+    margin-bottom: 26px;
+    border: 1px solid #F0E4C8;
+    cursor: pointer;
+    transform: rotate(-0.6deg);
+    transition: transform 0.2s ease;
+  }
+  .continue-card:active { transform: rotate(-0.6deg) scale(0.98); }
+  .continue-label {
+    font-family: var(--font-hand);
+    font-size: 19px; font-weight: 600;
+    color: var(--coral-deep);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .continue-title { font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .continue-meta { font-size: 13px; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+  .continue-arrow {
+    position: absolute; top: 20px; right: 20px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--coral); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .section-label {
+    font-family: var(--font-hand);
+    font-size: 19px; font-weight: 600;
+    color: var(--ink);
+    margin: 4px 0 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label .count-badge {
+    font-family: var(--font-ui);
+    font-size: 11px; font-weight: 600;
+    background: var(--coral-tint); color: var(--coral-deep);
+    padding: 2px 9px; border-radius: 20px;
+  }
+
+  .revisit-row { display: flex; gap: 12px; margin-bottom: 30px; overflow: visible; }
+  .revisit-card {
+    flex: 1;
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: 16px 14px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--paper-border);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .revisit-card:active { transform: scale(0.97); }
+  .revisit-card:nth-child(1) { transform: rotate(-1deg); }
+  .revisit-card:nth-child(2) { transform: rotate(1deg); }
+  .revisit-dot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 10px; }
+  .revisit-title { font-size: 14.5px; font-weight: 600; color: var(--ink); margin-bottom: 5px; }
+  .revisit-status { font-size: 12px; color: var(--ink-soft); }
+
+  .session-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 4px;
+    border-bottom: 1px solid var(--cream-deep);
+    cursor: pointer;
+  }
+  .session-row:last-child { border-bottom: none; }
+  .session-icon {
+    width: 42px; height: 42px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .session-title { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+  .session-sub { font-size: 12px; color: var(--ink-faint); margin-top: 2px; }
+  .session-chev { margin-left: auto; color: var(--ink-faint); }
+
+  .fab {
+    position: absolute;
+    bottom: 92px; left: 50%; transform: translateX(-50%);
+    background: var(--coral); color: #fff;
+    padding: 15px 26px;
+    border-radius: 999px;
+    display: flex; align-items: center; gap: 9px;
+    font-weight: 600; font-size: 15px;
+    box-shadow: 0 10px 26px rgba(201, 111, 92, 0.42);
+    cursor: pointer;
+    z-index: 30;
+    transition: transform 0.15s ease;
+    white-space: nowrap;
+  }
+  .fab:active { transform: translateX(-50%) scale(0.94); }
+
+  /* ============ BOTTOM NAV ============ */
+  .bottom-nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 78px;
+    background: rgba(251, 246, 237, 0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--paper-border);
+    display: flex; align-items: center; justify-content: space-around;
+    padding-bottom: 14px;
+    z-index: 50;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; color: var(--ink-faint);
+    font-size: 10.5px; font-weight: 500;
+    width: 64px;
+    transition: color 0.15s ease;
+  }
+  .nav-item.active { color: var(--coral-deep); }
+  .nav-item svg { width: 22px; height: 22px; }
+
+  /* ============ SECTION 3: START SESSION ============ */
+  .start-body {
+    height: calc(100% - 40px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 0 32px 60px;
+    text-align: center;
+  }
+  .record-ring {
+    width: 156px; height: 156px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 60%, var(--coral-tint) 100%);
+    border: 2px solid var(--coral);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 30px;
+    cursor: pointer;
+    box-shadow: 0 0 0 8px rgba(201,111,92,0.08), var(--shadow-soft);
+    transition: transform 0.15s ease;
+    position: relative;
+  }
+  .record-ring:active { transform: scale(0.96); }
+  .record-ring::before {
+    content: '';
+    position: absolute; inset: -8px;
+    border-radius: 50%;
+    border: 1.5px dashed var(--coral);
+    opacity: 0.4;
+    animation: spin 18s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .record-inner {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: var(--coral);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+  }
+  .start-copy { font-size: 15px; color: var(--ink-soft); margin-bottom: 40px; }
+  .start-fields { width: 100%; margin-top: 8px; }
+  .field-row {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border: 1px solid var(--paper-border);
+    border-radius: var(--radius-sm);
+    padding: 13px 16px; margin-bottom: 10px;
+    font-size: 14px; color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  /* ============ SECTION 4: RECORDING ============ */
+  .rec-screen { display: flex; flex-direction: column; height: calc(100% - 44px); padding-bottom: 40px; }
+  .rec-top { padding: 0 24px; text-align: center; }
+  .rec-title { font-size: 16px; font-weight: 600; }
+  .rec-timer {
+    font-size: 52px; font-weight: 600; letter-spacing: 1px;
+    color: var(--ink); margin: 26px 0 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .rec-live { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--coral-deep); font-weight: 600; margin-bottom: 30px; }
+  .rec-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--coral); animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+  .waveform {
+    display: flex; align-items: center; justify-content: center; gap: 3px;
+    height: 60px; margin: 0 auto 40px; padding: 0 40px;
+  }
+  .wave-bar {
+    width: 3.5px; border-radius: 3px;
+    background: var(--periwinkle);
+    animation: wave 1.2s ease-in-out infinite;
+  }
+  @keyframes wave { 0%,100%{ transform: scaleY(0.3);} 50%{ transform: scaleY(1);} }
+
+  .tag-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; padding: 0 20px; margin-top: auto; margin-bottom: 22px;
+  }
+  .tag-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    background: #fff; border: 1px solid var(--paper-border);
+    border-radius: var(--radius-md);
+    padding: 14px 6px;
+    cursor: pointer; position: relative;
+    transition: transform 0.12s ease, background 0.15s ease;
+  }
+  .tag-btn:active { transform: scale(0.92); }
+  .tag-icon-circle {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .tag-label { font-size: 10.5px; font-weight: 500; color: var(--ink-soft); }
+  .tag-confirm {
+    position: absolute; top: -8px; right: -6px;
+    background: var(--sage); color: #fff;
+    font-size: 9px; font-weight: 700;
+    padding: 3px 7px; border-radius: 20px;
+    opacity: 0; transform: scale(0.6) translateY(4px);
+    transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
+    white-space: nowrap;
+  }
+  .tag-confirm.show { opacity: 1; transform: scale(1) translateY(0); }
+
+  .finish-btn-wrap { padding: 0 24px; }
+  .btn-finish {
+    background: var(--ink); color: #fff;
+  }
+
+  /* ============ SECTION 5: PROCESSING ============ */
+  .processing-screen {
+    height: calc(100% - 44px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 0 40px;
+  }
+  .proc-illo {
+    width: 120px; height: 120px; margin-bottom: 32px;
+    position: relative;
+  }
+  .proc-ring {
+    width: 100%; height: 100%; border-radius: 50%;
+    border: 3px solid var(--cream-deep);
+    border-top-color: var(--coral);
+    animation: spin 1.1s linear infinite;
+    position: absolute; inset: 0;
+  }
+  .proc-emoji { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+  .proc-text {
+    font-family: var(--font-hand);
+    font-size: 24px; font-weight: 600; color: var(--ink);
+    min-height: 34px;
+  }
+
+  /* ============ SECTION 6: LEARNING PACK ============ */
+  .lp-header { padding: 4px 22px 6px; }
+  .lp-title { font-size: 23px; font-weight: 700; color: var(--ink); }
+  .lp-meta { font-size: 13px; color: var(--ink-faint); margin-top: 4px; }
+  .lp-annotation {
+    font-family: var(--font-hand);
+    font-size: 20px; color: var(--coral-deep); font-weight: 600;
+    margin: 14px 22px 18px;
+    display: flex; align-items: center; gap: 8px;
+    transform: rotate(-1deg);
+  }
+  .lp-scroll { padding: 0 22px 140px; }
+
+  .lp-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--paper-border);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .lp-card:active { transform: scale(0.985); }
+  .lp-card-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 600;
+    padding: 5px 12px; border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .lp-card-title { font-size: 16.5px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+  .lp-card-body { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+
+  .lp-concept-map {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 4px 6px;
+    gap: 4px;
+  }
+  .map-node {
+    flex: 1; text-align: center;
+  }
+  .map-node-box {
+    background: var(--peri-tint); color: #454E7C;
+    border-radius: 12px; padding: 10px 4px;
+    font-size: 11px; font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .map-arrow { color: var(--ink-faint); font-size: 14px; padding: 0 2px 14px; }
+
+  .lp-remember-list { display: flex; flex-direction: column; gap: 10px; }
+  .remember-item { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; }
+  .remember-num {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--butter-tint); color: var(--ink);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  .lp-recall-row { display: flex; align-items: center; justify-content: space-between; }
+  .recall-cards-count { font-size: 12.5px; color: var(--ink-faint); margin-top: 4px; }
+  .mini-cta {
+    background: var(--ink); color: #fff;
+    font-size: 12.5px; font-weight: 600;
+    padding: 9px 16px; border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .lp-next-card {
+    background: linear-gradient(135deg, var(--sage-tint) 0%, #fff 90%);
+    border: 1px solid #D7E5D3;
+  }
+  .lp-next-card .lp-card-title { font-size: 19px; }
+
+  /* ============ SECTION 7: QUICK RECALL ============ */
+  .recall-screen { height: calc(100% - 44px); display: flex; flex-direction: column; padding: 0 24px 30px; }
+  .recall-progress { display: flex; gap: 5px; margin-bottom: 26px; }
+  .recall-progress-seg { flex: 1; height: 4px; border-radius: 4px; background: var(--cream-deep); overflow: hidden; }
+  .recall-progress-seg.done { background: var(--coral); }
+  .recall-progress-seg.current { background: linear-gradient(90deg, var(--coral) 50%, var(--cream-deep) 50%); }
+
+  .flashcard-zone { flex: 1; display: flex; align-items: center; justify-content: center; perspective: 1400px; }
+  .flashcard {
+    width: 100%; max-width: 300px; height: 340px;
+    position: relative;
+    cursor: pointer;
+  }
+  .flashcard-inner {
+    width: 100%; height: 100%;
+    position: relative;
+    transition: transform 0.55s cubic-bezier(.4,.2,.2,1);
+    transform-style: preserve-3d;
+  }
+  .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+  .flashcard-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    border-radius: var(--radius-lg);
+    padding: 30px 26px;
+    display: flex; flex-direction: column;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--paper-border);
+  }
+  .flashcard-front { background: #fff; }
+  .flashcard-back { background: var(--sage-tint); transform: rotateY(180deg); border-color: #D7E5D3; }
+  .fc-eyebrow { font-size: 11.5px; font-weight: 700; color: var(--ink-faint); letter-spacing: 0.5px; margin-bottom: 16px; }
+  .fc-question { font-size: 19px; font-weight: 600; color: var(--ink); line-height: 1.4; flex: 1; }
+  .fc-answer { font-size: 16px; color: var(--ink); line-height: 1.55; flex: 1; }
+  .fc-hint { font-size: 12.5px; color: var(--ink-faint); text-align: center; margin-top: auto; }
+
+  .confidence-row {
+    display: flex; gap: 8px; margin-top: 24px;
+    opacity: 0; transform: translateY(10px); pointer-events: none;
+    transition: all 0.3s ease;
+  }
+  .confidence-row.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .conf-btn {
+    flex: 1; padding: 12px 4px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px; font-weight: 600;
+    text-align: center; cursor: pointer;
+    border: 1.5px solid var(--paper-border);
+    background: #fff; color: var(--ink-soft);
+    transition: transform 0.12s ease;
+  }
+  .conf-btn:active { transform: scale(0.93); }
+
+  .recall-done {
+    height: 100%; display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 0 20px;
+  }
+  .recall-done.show { display: flex; }
+  .recall-done-emoji { font-size: 48px; margin-bottom: 18px; }
+  .recall-done-title { font-family: var(--font-hand); font-size: 26px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+  .recall-done-sub { font-size: 14px; color: var(--ink-soft); margin-bottom: 34px; }
+
+  /* ============ SECTION 8: REVIEW / NEXT BEST ACTION ============ */
+  .review-scroll { padding: 6px 22px 140px; }
+  .review-heading { font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .review-sub { font-size: 13.5px; color: var(--ink-faint); margin-bottom: 22px; }
+
+  .nba-hero {
+    background: linear-gradient(150deg, #fff 0%, var(--coral-tint) 120%);
+    border: 1px solid #EAD2C8;
+    border-radius: var(--radius-lg);
+    padding: 24px 22px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-soft);
+    position: relative;
+  }
+  .nba-eyebrow {
+    font-family: var(--font-hand);
+    font-size: 17px; font-weight: 600; color: var(--coral-deep);
+    margin-bottom: 8px; display: block;
+  }
+  .nba-status { font-size: 15px; color: var(--ink-soft); margin-bottom: 4px; }
+  .nba-action { font-size: 21px; font-weight: 700; color: var(--ink); margin-bottom: 18px; }
+  .nba-diagnosis {
+    background: rgba(255,255,255,0.6);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13px; color: var(--ink-soft);
+    line-height: 1.55; margin-bottom: 18px;
+    font-style: italic;
+  }
+
+  .mastery-dims { display: flex; flex-direction: column; gap: 10px; margin: 16px 0 18px; }
+  .mastery-dim-row { display: flex; align-items: center; gap: 10px; }
+  .mastery-dim-label { font-size: 11.5px; color: var(--ink-soft); width: 92px; flex-shrink: 0; }
+  .mastery-dots { display: flex; gap: 4px; }
+  .mastery-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--cream-deep); }
+  .mastery-dot.filled { background: var(--periwinkle); }
+
+  .alt-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #fff; border: 1px solid var(--paper-border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px; margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .alt-title { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .alt-time { font-size: 12px; color: var(--ink-faint); margin-top: 2px; }
+  .alt-go { color: var(--ink-faint); }
+
+  .stronger-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 4px;
+  }
+  .stronger-check {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--sage-tint); color: #5C7A58;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0;
+  }
+  .stronger-title { font-size: 13.5px; font-weight: 500; color: var(--ink-soft); }
+
+  /* toast */
+  .toast {
+    position: absolute; bottom: 100px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff;
+    font-size: 13px; font-weight: 500;
+    padding: 12px 20px; border-radius: 999px;
+    opacity: 0; pointer-events: none;
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+    z-index: 200; white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ============ SECTION 9: SEGMENTED CONTROLS (Quick/Short/Deep, Explain-as) ============ */
+  .seg-control {
+    display: inline-flex; background: var(--cream-deep);
+    border-radius: 999px; padding: 3px; gap: 2px;
+    margin-bottom: 10px;
+  }
+  .seg-btn {
+    font-family: var(--font-ui);
+    font-size: 11.5px; font-weight: 600;
+    padding: 6px 13px; border-radius: 999px;
+    color: var(--ink-faint); cursor: pointer;
+    border: none; background: transparent;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+  }
+  .seg-btn.active { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(90,70,45,0.10); }
+  .seg-btn:active { transform: scale(0.95); }
+
+  .fade-swap { animation: fadeSwap 0.28s ease; }
+  @keyframes fadeSwap { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Explain-it-as chip row */
+  .explain-as-row {
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 12px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  .explain-as-row::-webkit-scrollbar { display: none; }
+  .explain-chip {
+    flex-shrink: 0;
+    font-size: 11px; font-weight: 600;
+    padding: 7px 12px; border-radius: 999px;
+    background: #fff; border: 1.5px solid var(--paper-border);
+    color: var(--ink-soft); cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    transition: all 0.15s ease;
+  }
+  .explain-chip.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .explain-chip:active { transform: scale(0.94); }
+
+  /* Analogy "another angle" control */
+  .analogy-switch {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px dashed var(--paper-border);
+  }
+  .analogy-dots { display: flex; gap: 4px; }
+  .analogy-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--paper-border); }
+  .analogy-dot.active { background: var(--sage); width: 14px; border-radius: 3px; }
+  .analogy-next-btn {
+    font-size: 11.5px; font-weight: 600; color: var(--coral-deep);
+    display: flex; align-items: center; gap: 4px; cursor: pointer;
+  }
+  .analogy-next-btn:active { transform: scale(0.94); }
+  .why-analogy-toggle {
+    font-size: 10.5px; color: var(--ink-faint); margin-top: 10px;
+    text-decoration: underline; text-decoration-style: dotted;
+    cursor: pointer; display: inline-block;
+  }
+  .why-analogy-body {
+    font-size: 11.5px; color: var(--ink-soft); line-height: 1.5;
+    background: var(--cream-deep); border-radius: 10px; padding: 10px 12px;
+    margin-top: 8px; display: none;
+  }
+  .why-analogy-body.show { display: block; }
+
+  /* ============ SECTION 10: EXAM MODE ============ */
+  .exam-toggle {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 600; color: var(--periwinkle);
+    background: var(--peri-tint); padding: 7px 13px; border-radius: 999px;
+    cursor: pointer; margin: 14px 22px 0; width: fit-content;
+    transition: all 0.15s ease;
+  }
+  .exam-toggle.active { background: #454E7C; color: #fff; }
+  .exam-toggle:active { transform: scale(0.96); }
+  .exam-card { display: none; }
+  .exam-card.show { display: block; }
+  .exam-row { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--cream-deep); }
+  .exam-row:last-child { border-bottom: none; }
+  .exam-row-label { font-size: 10.5px; font-weight: 700; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.3px; width: 78px; flex-shrink: 0; }
+  .exam-row-body { font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; flex: 1; }
+
+  /* ============ SECTION 11: DAILY MISSION / STREAK ============ */
+  .streak-chip {
+    display: flex; align-items: center; gap: 5px;
+    background: #fff; border: 1px solid var(--paper-border);
+    padding: 7px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; color: var(--ink);
+    box-shadow: var(--shadow-card); cursor: pointer;
+  }
+
+  .mission-card {
+    background: linear-gradient(135deg, #fff 0%, var(--peri-tint) 130%);
+    border: 1px solid #DADDF0;
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    transform: rotate(0.5deg);
+  }
+  .mission-card:active { transform: rotate(0.5deg) scale(0.98); }
+  .mission-label {
+    font-family: var(--font-hand);
+    font-size: 18px; font-weight: 600; color: #454E7C;
+    margin-bottom: 8px; display: block;
+  }
+  .mission-steps { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .mission-step { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-soft); }
+  .mission-step-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--periwinkle); flex-shrink: 0; }
+  .mission-go-btn {
+    background: #454E7C; color: #fff;
+    font-size: 13px; font-weight: 600;
+    padding: 10px 20px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+
+  /* ============ SECTION 12: MASTERY LABEL + CONNECTIONS + SURPRISE ============ */
+  .mastery-label-pill {
+    font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .mastery-label-pill.new { background: var(--cream-deep); color: var(--ink-faint); }
+  .mastery-label-pill.familiar { background: var(--peri-tint); color: #454E7C; }
+  .mastery-label-pill.shaky { background: var(--coral-tint); color: var(--coral-deep); }
+  .mastery-label-pill.strong { background: var(--butter-tint); color: #8A6A1F; }
+  .mastery-label-pill.mastered { background: var(--sage-tint); color: #52704E; }
+
+  .connect-card {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .connect-line {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12.5px; color: var(--ink-soft); margin: 8px 0;
+  }
+  .connect-arrow-down { color: var(--ink-faint); font-size: 13px; }
+  .connect-target { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .connect-meta { font-size: 11.5px; color: var(--ink-faint); margin-top: 2px; margin-bottom: 12px; }
+
+  .surprise-card {
+    background: linear-gradient(135deg, #fff 0%, var(--butter-tint) 130%);
+    border: 1px solid #F0E4C8;
+    border-radius: var(--radius-md);
+    padding: 15px 17px; margin-top: 8px;
+    cursor: pointer;
+  }
+  .surprise-eyebrow { font-family: var(--font-hand); font-size: 16px; font-weight: 600; color: #8A6A1F; margin-bottom: 6px; display: block; }
+
+  /* recall format badges */
+  .recall-format-badge {
+    text-align: center;
+    font-size: 10px; font-weight: 700; color: var(--ink-faint);
+    text-transform: uppercase; letter-spacing: 0.4px;
+    background: var(--cream-deep); padding: 3px 10px; border-radius: 999px;
+    display: inline-block; margin: 0 auto 14px; align-self: center;
+  }
+  .mcq-options { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+  .mcq-option {
+    text-align: left; padding: 11px 14px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--paper-border); background: #fff;
+    font-size: 13px; color: var(--ink); cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mcq-option:active { transform: scale(0.98); }
+  .mcq-option.correct { background: var(--sage-tint); border-color: var(--sage); }
+  .mcq-option.incorrect { background: var(--coral-tint); border-color: var(--coral); }
+  .gap-fill-input {
+    width: 100%; font-family: var(--font-ui); font-size: 14px;
+    padding: 11px 14px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--paper-border); background: #fff;
+    color: var(--ink); margin-top: 6px;
+  }
+  .gap-fill-input:focus { outline: none; border-color: var(--periwinkle); }
+
+  /* recall reward summary */
+  .recall-stat-row { display: flex; gap: 20px; justify-content: center; margin-bottom: 18px; }
+  .recall-stat { text-align: center; }
+  .recall-stat-num { font-size: 22px; font-weight: 700; color: var(--ink); }
+  .recall-stat-label { font-size: 10.5px; color: var(--ink-faint); }
+  .recall-next-line { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 4px; }
+  .recall-momentum-line { font-size: 11.5px; color: var(--sage); font-weight: 600; margin-top: 4px; }
+
+  /* ============ SECTION 13: VISUAL EXPLAIN ============ */
+  /* --- ink accent tokens (muted blue, near-black ink) --- */
+  :root {
+    --ink-stroke: #2E2A26;
+    --sketch-blue: #5B76B7;
+    --sketch-blue-soft: #8fa0cf;
+    --sketch-paper: #FFFFFF;
+  }
+
+  /* Level 1 card inside the Learning Pack */
+  .visual-explain-card {
+    background: #fff;
+    border: 1.5px solid var(--ink-stroke);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 3px 3px 0 rgba(46,42,38,0.10);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .visual-explain-card:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 rgba(46,42,38,0.10); }
+  .ve-eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; color: var(--sketch-blue);
+    display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
+  }
+  .ve-concept { font-family: var(--font-hand); font-size: 27px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .ve-question { font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; }
+  .ve-mini-sketch { display: flex; justify-content: center; margin: 6px 0 14px; }
+  .ve-oneline { font-family: var(--font-hand); font-size: 17px; color: var(--ink); text-align: center; margin-bottom: 14px; }
+  .ve-explore {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    border: 1.5px solid var(--ink-stroke); border-radius: 999px;
+    padding: 8px 18px; background: #fff;
+  }
+  .ve-explore-arrow { transition: transform 0.2s ease; }
+  .visual-explain-card:active .ve-explore-arrow { transform: translateX(3px); }
+
+  /* Full-screen Visual canvas */
+  #screen-visual { background: var(--sketch-paper); padding-top: 44px; }
+  .vc-scroll { padding: 4px 22px 60px; }
+  .vc-topbar-title { font-family: var(--font-hand); font-size: 20px; }
+  .vc-concept-title { font-family: var(--font-hand); font-size: 34px; font-weight: 700; color: var(--ink); line-height: 1.05; margin-bottom: 2px; }
+  .vc-concept-q { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 18px; }
+
+  /* central concept + spatial mode nodes (Level 2) */
+  .vc-node-map { position: relative; height: 300px; margin: 6px 0 10px; }
+  .vc-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 118px; height: 118px; border-radius: 50%;
+    border: 2px solid var(--ink-stroke); background: #fff;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-family: var(--font-hand); font-size: 18px; font-weight: 700; color: var(--ink);
+    padding: 10px; z-index: 3;
+    box-shadow: 3px 3px 0 rgba(46,42,38,0.08);
+  }
+  .vc-node {
+    position: absolute; z-index: 4;
+    width: 66px; height: 66px; border-radius: 50%;
+    border: 1.5px solid var(--ink-stroke); background: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; text-align: center;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  }
+  .vc-node:active { transform: scale(0.92); }
+  .vc-node.active { background: var(--sketch-blue); border-color: var(--sketch-blue); }
+  .vc-node.active .vc-node-label { color: #fff; }
+  .vc-node.active .vc-node-icon { filter: grayscale(1) brightness(3); }
+  .vc-node-icon { font-size: 15px; line-height: 1; }
+  .vc-node-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: var(--ink); margin-top: 2px; }
+  .vc-node.n-what  { top: 2px;  left: 50%; transform: translateX(-50%); }
+  .vc-node.n-what:active { transform: translateX(-50%) scale(0.92); }
+  .vc-node.n-how   { top: 44%; left: 0; transform: translateY(-50%); }
+  .vc-node.n-how:active { transform: translateY(-50%) scale(0.92); }
+  .vc-node.n-why   { top: 44%; right: 0; transform: translateY(-50%); }
+  .vc-node.n-why:active { transform: translateY(-50%) scale(0.92); }
+  .vc-node.n-when  { bottom: 2px; left: 26%; transform: translateX(-50%); }
+  .vc-node.n-when:active { transform: translateX(-50%) scale(0.92); }
+  .vc-node.n-example { bottom: 2px; right: 26%; transform: translateX(50%); }
+  .vc-node.n-example:active { transform: translateX(50%) scale(0.92); }
+  .vc-connectors { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .vc-hint-hand { font-family: var(--font-hand); font-size: 15px; color: var(--sketch-blue); text-align: center; margin-top: 2px; }
+
+  /* revealed explanation panel (Level 3/4) */
+  .vc-panel {
+    border: 1.5px solid var(--ink-stroke); border-radius: var(--radius-md);
+    background: #fff; padding: 18px; margin-top: 14px;
+    box-shadow: 3px 3px 0 rgba(46,42,38,0.07);
+    animation: fadeSwap 0.28s ease;
+  }
+  .vc-panel-eyebrow { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--sketch-blue); margin-bottom: 8px; }
+  .vc-panel-title { font-family: var(--font-hand); font-size: 22px; color: var(--ink); margin-bottom: 8px; }
+  .vc-panel-body { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; }
+  .vc-panel-body b { color: var(--ink); }
+
+  /* --- shared branch bits --- */
+  .vc-lead { font-size: 14px; color: var(--ink); line-height: 1.55; margin-bottom: 14px; }
+  .vc-tiny-hint { font-family: var(--font-hand); font-size: 14px; color: var(--sketch-blue); margin-top: 12px; text-align: center; }
+  .vc-lens-body { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; }
+  .vc-sketch-lead { font-family: var(--font-hand); font-size: 16px; color: var(--sketch-blue); text-align: center; margin-bottom: 6px; }
+
+  /* WHAT: vertical flow boxes + one-liner + depth toggles */
+  .what-flow { display: flex; flex-direction: column; align-items: center; margin: 4px 0 14px;
+    border: 1.5px solid var(--paper-border); border-radius: var(--radius-md); padding: 16px 12px; }
+  .wf-box { border: 1.5px solid var(--ink-stroke); border-radius: 7px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--ink); background: #fff; }
+  .wf-box-blue { border-color: var(--sketch-blue); color: var(--sketch-blue); }
+  .wf-arrow { color: var(--ink-faint); font-size: 15px; line-height: 1.4; }
+  .vc-oneliner { font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.5; }
+  .vc-oneliner-tag { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--sketch-blue); margin-right: 6px; }
+  .vc-depth-row { display: flex; gap: 8px; }
+  .vc-depth-btn {
+    flex: 1; font-family: var(--font-ui); font-size: 12px; font-weight: 600; cursor: pointer;
+    padding: 9px 10px; border-radius: var(--radius-sm); background: #fff;
+    border: 1.5px solid var(--paper-border); color: var(--ink-soft); transition: all 0.15s ease;
+  }
+  .vc-depth-btn.active { border-color: var(--sketch-blue); color: var(--sketch-blue); background: #f6f8fc; }
+  .vc-depth-btn:active { transform: scale(0.97); }
+  .vc-depth-out { font-size: 13px; color: var(--ink-soft); line-height: 1.55; margin-top: 0; max-height: 0; overflow: hidden; transition: max-height 0.25s ease, margin-top 0.25s ease; }
+  .vc-depth-out-show { max-height: 200px; margin-top: 12px; }
+
+  /* HOW: numbered vertical steps, tap to expand */
+  .how-flow { display: flex; flex-direction: column; align-items: stretch; }
+  .how-step { border: 1.5px solid var(--paper-border); border-radius: var(--radius-sm); background: #fff; cursor: pointer; transition: border-color 0.15s ease; }
+  .how-step.open { border-color: var(--sketch-blue); }
+  .how-step-head { display: flex; align-items: center; gap: 12px; padding: 11px 13px; }
+  .how-step-num { font-family: var(--font-hand); font-size: 18px; font-weight: 700; color: var(--sketch-blue); flex-shrink: 0; width: 24px; }
+  .how-step-label { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; }
+  .how-step-caret { color: var(--ink-faint); font-size: 14px; transition: transform 0.2s ease; }
+  .how-step.open .how-step-caret { transform: rotate(45deg); }
+  .how-step-detail { font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; max-height: 0; overflow: hidden; transition: max-height 0.25s ease, padding 0.25s ease; padding: 0 13px; }
+  .how-step.open .how-step-detail { max-height: 160px; padding: 0 13px 12px; }
+  .how-connector { text-align: center; color: var(--ink-faint); font-size: 14px; line-height: 1.3; }
+  .how-repeat { text-align: center; font-family: var(--font-hand); font-size: 15px; color: var(--sketch-blue); margin-top: 4px; }
+
+  /* WHY: reasons + with/without comparison */
+  .why-reasons { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .why-reason { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--ink); }
+  .why-arrow { color: var(--sketch-blue); font-weight: 700; }
+  .why-compare { display: flex; gap: 10px; }
+  .why-col { flex: 1; border: 1.5px solid var(--paper-border); border-radius: var(--radius-sm); padding: 12px; font-size: 12px; color: var(--ink-soft); line-height: 1.45; }
+  .why-without { background: #fdf6f4; border-color: #efd9d2; }
+  .why-with { background: #f6f8fc; border-color: #d5ddef; }
+  .why-col-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+  .why-without .why-col-tag { color: var(--coral-deep); }
+  .why-with .why-col-tag { color: var(--sketch-blue); }
+
+  /* WHEN: situation cards with hand-drawn markers */
+  .when-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+  .when-card { display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--paper-border); border-radius: var(--radius-sm); padding: 12px 13px; background: #fff; }
+  .when-icon { font-size: 18px; flex-shrink: 0; }
+  .when-label { font-size: 12.5px; font-weight: 600; color: var(--ink); line-height: 1.25; }
+
+  /* EXAMPLE: scenario walkthrough */
+  .ex-scenario-tag { display: inline-block; font-family: var(--font-hand); font-size: 20px; font-weight: 700; color: var(--ink); border-bottom: 2px solid var(--sketch-blue); margin-bottom: 14px; }
+  .example-flow { display: flex; flex-direction: column; align-items: center; }
+  .ex-step { border: 1.5px solid var(--ink-stroke); border-radius: 7px; padding: 9px 16px; font-size: 12.5px; font-weight: 600; color: var(--ink); background: #fff; text-align: center; min-width: 60%; }
+  .ex-step.ex-blue { border-color: var(--sketch-blue); color: var(--sketch-blue); }
+  .ex-arrow { color: var(--ink-faint); font-size: 15px; line-height: 1.3; }
+  .ex-takeaway { font-family: var(--font-hand); font-size: 18px; color: var(--sketch-blue); text-align: center; margin-top: 14px; }
+
+  /* lens row label */
+  .vc-mode-label { flex-shrink: 0; font-family: var(--font-hand); font-size: 16px; color: var(--ink); display: flex; align-items: center; padding-right: 2px; }
+
+  /* Level 3 mode chips */
+  .vc-modes { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 4px; margin: 14px 0 0;
+    -ms-overflow-style: none; scrollbar-width: none; }
+  .vc-modes::-webkit-scrollbar { display: none; }
+  .vc-mode-chip {
+    flex-shrink: 0; font-size: 11.5px; font-weight: 600;
+    padding: 8px 14px; border-radius: 999px; cursor: pointer;
+    background: #fff; border: 1.5px solid var(--ink-stroke); color: var(--ink);
+    transition: all 0.15s ease; white-space: nowrap;
+  }
+  .vc-mode-chip.active { background: var(--ink-stroke); color: #fff; }
+  .vc-mode-chip:active { transform: scale(0.95); }
+
+  /* step-by-step list inside a panel */
+  .vc-steps { display: flex; flex-direction: column; gap: 9px; margin-top: 4px; }
+  .vc-step { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
+  .vc-step-num {
+    width: 22px; height: 22px; flex-shrink: 0; margin-top: 1px;
+    border: 1.5px solid var(--sketch-blue); border-radius: 50%;
+    color: var(--sketch-blue); font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* sketchnote SVG frame (Level 4) */
+  .vc-sketch-frame { display: flex; justify-content: center; margin-top: 6px; }
+  .vc-sketch-frame svg { width: 100%; max-width: 320px; height: auto; }
+  .sketch-label { font-family: var(--font-hand); font-size: 15px; fill: var(--ink); }
+  .sketch-label-blue { font-family: var(--font-hand); font-size: 14px; fill: var(--sketch-blue); }
+
+  /* recall-from-concept CTA */
+  .vc-recall-cta {
+    border: 1.5px dashed var(--ink-stroke); border-radius: var(--radius-md);
+    padding: 16px 18px; margin-top: 16px; background: #fff;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    cursor: pointer;
+  }
+  .vc-recall-lead { font-family: var(--font-hand); font-size: 16px; color: var(--sketch-blue); margin-bottom: 2px; }
+  .vc-recall-q { font-size: 13.5px; color: var(--ink); line-height: 1.3; }
+  .vc-recall-go {
+    flex-shrink: 0; font-size: 12.5px; font-weight: 700; color: #fff;
+    background: var(--ink-stroke); border-radius: 999px; padding: 9px 16px; white-space: nowrap;
+  }
+
+  /* mastery trail (gamification connection) */
+  .vc-trail { display: flex; flex-direction: column; gap: 7px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #eee; }
+  .vc-trail-row { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--ink-faint); }
+  .vc-trail-check {
+    width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+    border: 1.5px solid #d8d2c6; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: transparent;
+  }
+  .vc-trail-row.done .vc-trail-check { border-color: var(--sketch-blue); background: var(--sketch-blue); color: #fff; }
+  .vc-trail-row.done { color: var(--ink); }
+  .vc-verdict { font-family: var(--font-hand); font-size: 18px; color: var(--sketch-blue); margin-top: 12px; text-align: center; }
+
+  /* Desktop / tablet: concept map beside content */
+  @media (min-width: 760px) {
+    .device { width: 720px; height: 860px; }
+    .vc-node-map { height: 340px; max-width: 460px; margin-left: auto; margin-right: auto; }
+  }
+
+  /* label chips reused colors */
+  .chip-coral { background: var(--coral-tint); color: var(--coral-deep); }
+  .chip-sage { background: var(--sage-tint); color: #52704E; }
+  .chip-butter { background: var(--butter-tint); color: #8A6A1F; }
+  .chip-peri { background: var(--peri-tint); color: #454E7C; }
+
+  /* prototype badge outside device */
+  .proto-badge {
+    position: fixed; top: 18px; left: 18px;
+    background: rgba(46,42,38,0.85); color: #fff;
+    font-size: 12px; padding: 8px 14px; border-radius: 10px;
+    font-family: var(--font-ui);
+    z-index: 999;
+    backdrop-filter: blur(4px);
+  }
+  .proto-badge b { color: var(--butter); }
+  @media (max-width: 500px) { .proto-badge { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="proto-badge">🧪 Clickable prototype &mdash; <b>Marrow</b> (working name)</div>
+
+<div class="stage">
+  <div class="device">
+    <div class="notch"></div>
+    <div class="screen-wrap">
+
+      <!-- ============ 1. ONBOARDING ============ -->
+      <div class="screen active" id="screen-onboarding">
+        <div class="grain"></div>
+        <div class="onb-skip" onclick="goTo('home')">Skip</div>
+        <div class="onb-track" id="onbTrack">
+          <div class="onb-slide">
+            <div class="onb-illo">
+              <svg viewBox="0 0 168 168" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="30" y="20" width="108" height="128" rx="14" fill="#fff" stroke="#E4D8C3" stroke-width="2" transform="rotate(-4 84 84)"/>
+                <rect x="34" y="24" width="100" height="120" rx="10" fill="#FBF1D6" transform="rotate(-4 84 84)"/>
+                <path d="M50 60 L110 52" stroke="#C96F5C" stroke-width="3" stroke-linecap="round" transform="rotate(-4 84 84)"/>
+                <path d="M50 78 L100 72" stroke="#C96F5C" stroke-width="3" stroke-linecap="round" opacity="0.6" transform="rotate(-4 84 84)"/>
+                <path d="M50 96 L90 92" stroke="#C96F5C" stroke-width="3" stroke-linecap="round" opacity="0.4" transform="rotate(-4 84 84)"/>
+                <circle cx="120" cy="115" r="22" fill="#8FA88C"/>
+                <path d="M111 115 L117 121 L129 108" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+            </div>
+            <div class="onb-title">This isn't another notes app.</div>
+            <div class="onb-sub">It's your own learning space &mdash; and it's about to get to know how you learn.</div>
+          </div>
+          <div class="onb-slide">
+            <div class="onb-illo">
+              <svg viewBox="0 0 168 168" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="84" cy="70" r="46" fill="#E4E6F5"/>
+                <path d="M60 65 Q84 45 108 65" stroke="#8B95C9" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <circle cx="70" cy="70" r="4" fill="#454E7C"/>
+                <circle cx="98" cy="70" r="4" fill="#454E7C"/>
+                <path d="M68 88 Q84 98 100 88" stroke="#454E7C" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M40 130 Q84 110 128 130" stroke="#C96F5C" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="1 8"/>
+              </svg>
+            </div>
+            <div class="onb-title">It listens, understands, and remembers &mdash; so you don't have to.</div>
+            <div class="onb-sub">You attend. It figures out what matters, what's confusing, and what you'll forget.</div>
+          </div>
+          <div class="onb-slide">
+            <div class="onb-illo">
+              <svg viewBox="0 0 168 168" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="34" y="30" width="100" height="70" rx="12" fill="#F3DCD5" transform="rotate(3 84 65)"/>
+                <rect x="44" y="70" width="90" height="70" rx="12" fill="#fff" stroke="#E4D8C3" stroke-width="2" transform="rotate(-2 89 105)"/>
+                <path d="M64 95 L114 95" stroke="#C96F5C" stroke-width="3" stroke-linecap="round" transform="rotate(-2 89 105)"/>
+                <path d="M64 110 L100 110" stroke="#E8C468" stroke-width="6" stroke-linecap="round" opacity="0.7" transform="rotate(-2 89 105)"/>
+              </svg>
+            </div>
+            <div class="onb-title">Let's make learning yours.</div>
+            <div class="onb-sub">A quick setup, then straight into your first session.</div>
+          </div>
+        </div>
+        <div class="onb-dots">
+          <div class="onb-dot active" data-dot="0"></div>
+          <div class="onb-dot" data-dot="1"></div>
+          <div class="onb-dot" data-dot="2"></div>
+        </div>
+        <div class="onb-footer">
+          <button class="btn btn-primary" id="onbBtn" onclick="onbNext()">Continue</button>
+        </div>
+      </div>
+
+      <!-- ============ 2. HOME ============ -->
+      <div class="screen" id="screen-home">
+        <div class="grain"></div>
+        <div class="home-header">
+          <div>
+            <div class="home-greeting">Hey, Manasi 👋</div>
+            <div class="home-date">Wednesday, September 10</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="streak-chip" onclick="showToast('4-day learning streak')">🔥 4</div>
+            <div class="search-pill" onclick="showToast('Search coming right up')">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-scroll">
+          <div class="mission-card" onclick="goTo('recall')">
+            <span class="mission-label">Today's 8-minute mission</span>
+            <div class="mission-steps">
+              <div class="mission-step"><span class="mission-step-dot"></span> 4 min recall</div>
+              <div class="mission-step"><span class="mission-step-dot"></span> 2 min revisit</div>
+              <div class="mission-step"><span class="mission-step-dot"></span> 2 min challenge</div>
+            </div>
+            <div class="mission-go-btn">Start <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M9 6l6 6-6 6"/></svg></div>
+          </div>
+
+          <div class="continue-card" onclick="goTo('learningpack')">
+            <div class="continue-arrow">→</div>
+            <span class="continue-label">Continue where you left off</span>
+            <div class="continue-title">Neural Networks</div>
+            <div class="continue-meta">🕐 8 min left in your Learning Pack</div>
+          </div>
+
+          <div class="section-label">Two things worth revisiting <span class="count-badge">2</span></div>
+          <div class="revisit-row">
+            <div class="revisit-card" onclick="goTo('review')">
+              <div class="revisit-dot" style="background:var(--coral);"></div>
+              <div class="revisit-title">Backpropagation</div>
+              <div class="revisit-status">Still a bit fuzzy</div>
+            </div>
+            <div class="revisit-card" onclick="goTo('review')">
+              <div class="revisit-dot" style="background:var(--sage);"></div>
+              <div class="revisit-title">Activation functions</div>
+              <div class="revisit-status">Getting stronger</div>
+            </div>
+          </div>
+
+          <div class="section-label" style="margin-top:22px;">Recent sessions</div>
+          <div class="session-list">
+            <div class="session-row" onclick="goTo('learningpack')">
+              <div class="session-icon" style="background:var(--peri-tint);">🧠</div>
+              <div>
+                <div class="session-title">Neural Networks</div>
+                <div class="session-sub">Today &middot; 47 min</div>
+              </div>
+              <div class="session-chev">›</div>
+            </div>
+            <div class="session-row" onclick="showToast('Opening Database Normalization')">
+              <div class="session-icon" style="background:var(--sage-tint);">🗂️</div>
+              <div>
+                <div class="session-title">Database Normalization</div>
+                <div class="session-sub">Yesterday &middot; 38 min</div>
+              </div>
+              <div class="session-chev">›</div>
+            </div>
+            <div class="session-row" onclick="showToast('Opening Computer Networks')">
+              <div class="session-icon" style="background:var(--butter-tint);">🌐</div>
+              <div>
+                <div class="session-title">Computer Networks</div>
+                <div class="session-sub">Monday &middot; 52 min</div>
+              </div>
+              <div class="session-chev">›</div>
+            </div>
+            <div class="session-row" onclick="showToast('Opening Operating Systems')">
+              <div class="session-icon" style="background:var(--coral-tint);">⚙️</div>
+              <div>
+                <div class="session-title">Operating Systems</div>
+                <div class="session-sub">Last week &middot; 41 min</div>
+              </div>
+              <div class="session-chev">›</div>
+            </div>
+          </div>
+
+          <div class="surprise-card" onclick="showToast('Still remember it? Starting a quick challenge...')" style="margin-top:16px;">
+            <span class="surprise-eyebrow">🎲 Surprise me</span>
+            <div style="font-size:12px; color:var(--ink-soft); line-height:1.5;">You haven't thought about <b style="color:var(--ink)">Database Normalization</b> in 11 days. Still remember it?</div>
+          </div>
+        </div>
+
+        <div class="fab" onclick="goTo('startsession')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Start a session
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-item active" data-nav="home" onclick="switchNav('home')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+            Home
+          </div>
+          <div class="nav-item" data-nav="sessions" onclick="switchNav('sessions')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16"/></svg>
+            Sessions
+          </div>
+          <div class="nav-item" data-nav="review" onclick="switchNav('review')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
+            Review
+          </div>
+          <div class="nav-item" data-nav="profile" onclick="switchNav('profile')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+            Profile
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 3. START SESSION ============ -->
+      <div class="screen" id="screen-startsession">
+        <div class="grain"></div>
+        <div class="topbar">
+          <div class="back-btn" onclick="goTo('home')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+          </div>
+          <div class="topbar-title">New session</div>
+          <div class="topbar-spacer"></div>
+        </div>
+        <div class="start-body">
+          <div class="record-ring" onclick="goTo('recording')">
+            <div class="record-inner">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="8"/></svg>
+            </div>
+          </div>
+          <div class="start-copy">Ready when you are.</div>
+          <button class="btn btn-primary" onclick="goTo('recording')" style="margin-bottom:22px;">Start listening</button>
+          <div class="start-fields">
+            <div class="field-row" onclick="showToast('Attach a PDF or slide deck')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h7"/><path d="M18 2l4 4-10 10H8v-4z"/></svg>
+              Attach slides / PDF
+            </div>
+            <div class="field-row" onclick="showToast('Editing session title')">
+              📝 Session title &middot; <span style="color:var(--ink-faint)">Untitled session</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 4. RECORDING ============ -->
+      <div class="screen" id="screen-recording">
+        <div class="grain"></div>
+        <div class="rec-screen">
+          <div class="rec-top">
+            <div class="rec-title">Neural Networks &mdash; Lecture 04</div>
+            <div class="rec-timer" id="recTimer">00:12:47</div>
+            <div class="rec-live"><span class="rec-dot"></span> Listening</div>
+          </div>
+          <div class="waveform" id="waveform"></div>
+
+          <div class="tag-grid">
+            <div class="tag-btn" onclick="tagConfirm(this,'Marked.')">
+              <div class="tag-icon-circle chip-coral">⭐</div>
+              <div class="tag-label">Important</div>
+              <div class="tag-confirm">Marked.</div>
+            </div>
+            <div class="tag-btn" onclick="tagConfirm(this,'Marked.')">
+              <div class="tag-icon-circle chip-peri">❓</div>
+              <div class="tag-label">Confusing</div>
+              <div class="tag-confirm">Marked.</div>
+            </div>
+            <div class="tag-btn" onclick="tagConfirm(this,'Saved.')">
+              <div class="tag-icon-circle chip-butter">💡</div>
+              <div class="tag-label">Insight</div>
+              <div class="tag-confirm">Saved.</div>
+            </div>
+            <div class="tag-btn" onclick="tagConfirm(this,'Bookmarked.')">
+              <div class="tag-icon-circle chip-sage">🔖</div>
+              <div class="tag-label">Bookmark</div>
+              <div class="tag-confirm">Bookmarked.</div>
+            </div>
+          </div>
+
+          <div class="finish-btn-wrap">
+            <button class="btn btn-primary btn-finish" onclick="finishRecording()">Finish</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 5. PROCESSING ============ -->
+      <div class="screen" id="screen-processing">
+        <div class="grain"></div>
+        <div class="processing-screen">
+          <div class="proc-illo">
+            <div class="proc-ring"></div>
+            <div class="proc-emoji">🧠</div>
+          </div>
+          <div class="proc-text" id="procText">Making sense of what you just heard.</div>
+        </div>
+      </div>
+
+      <!-- ============ 6. LEARNING PACK ============ -->
+      <div class="screen" id="screen-learningpack">
+        <div class="grain"></div>
+        <div class="topbar">
+          <div class="back-btn" onclick="goTo('home')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+          </div>
+          <div class="topbar-title">Learning Pack</div>
+          <div class="topbar-spacer"></div>
+        </div>
+        <div class="lp-header">
+          <div class="lp-title">Neural Networks</div>
+          <div class="lp-meta">Today &middot; 47 min</div>
+        </div>
+        <div class="exam-toggle" id="examToggle" onclick="toggleExamMode()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          <span id="examToggleLabel">Exam mode</span>
+        </div>
+        <div class="lp-annotation" id="lpAnnotation">✏️ Okay, THIS is the important bit.</div>
+
+        <div class="lp-scroll">
+
+          <!-- UNDERSTAND: Quick / Short / Deep -->
+          <div class="lp-card">
+            <span class="lp-card-tag chip-coral">🧠 Understand</span>
+            <div class="seg-control">
+              <button class="seg-btn active" id="segQuick" onclick="setSummaryLength('quick')">Quick</button>
+              <button class="seg-btn" id="segShort" onclick="setSummaryLength('short')">Short</button>
+              <button class="seg-btn" id="segDeep" onclick="setSummaryLength('deep')">Deep</button>
+            </div>
+            <div class="lp-card-title" id="understandTitle">Here's what this was really about.</div>
+            <div class="lp-card-body fade-swap" id="understandBody">A neural network is just layers of simple decisions stacked together. Each layer takes the last one's output, weighs it, and passes along only what matters &mdash; until the final layer makes a call.</div>
+          </div>
+
+          <div class="lp-card" onclick="showToast('Opening all 5 takeaways')">
+            <span class="lp-card-tag chip-butter">⭐ Remember</span>
+            <div class="lp-card-title">The 5 things worth keeping.</div>
+            <div class="lp-remember-list">
+              <div class="remember-item"><span class="remember-num">1</span> Weights decide how much each input matters.</div>
+              <div class="remember-item"><span class="remember-num">2</span> Activation functions add non-linearity.</div>
+              <div class="remember-item"><span class="remember-num">3</span> Backpropagation is how the network learns from mistakes.</div>
+            </div>
+          </div>
+
+          <!-- WHY THIS MATTERS -->
+          <div class="lp-card" onclick="showToast('Opening real-world applications')">
+            <span class="lp-card-tag chip-peri">💡 Why this matters</span>
+            <div class="lp-card-body">Backpropagation is what lets neural networks improve instead of repeating the same prediction errors.</div>
+            <div style="font-size:11px; color:var(--ink-faint); margin-top:10px;">Where you'll see it &middot; Computer Vision, NLP, Recommendation systems</div>
+          </div>
+
+          <div class="lp-card" onclick="showToast('Opening the full concept map')">
+            <span class="lp-card-tag chip-peri">🗺️ See</span>
+            <div class="lp-card-title">How the pieces connect.</div>
+            <div class="lp-concept-map">
+              <div class="map-node"><div class="map-node-box">Input</div></div>
+              <div class="map-arrow">→</div>
+              <div class="map-node"><div class="map-node-box">Weights</div></div>
+              <div class="map-arrow">→</div>
+              <div class="map-node"><div class="map-node-box">Activation</div></div>
+              <div class="map-arrow">→</div>
+              <div class="map-node"><div class="map-node-box">Output</div></div>
+            </div>
+            <div style="text-align:center; margin-top:10px;">
+              <span class="why-analogy-toggle" onclick="event.stopPropagation(); showToast('Opening the full memory map: Neurons, Weights, Activation, Forward Prop, Loss, Backprop, Gradient Descent')">See the full memory map &rarr;</span>
+            </div>
+          </div>
+
+          <!-- VISUAL EXPLAIN (Level 1 card -> opens full-screen canvas) -->
+          <div class="visual-explain-card" onclick="openVisual('backprop')">
+            <div class="ve-eyebrow">✎ Visual explain</div>
+            <div class="ve-concept">Backpropagation</div>
+            <div class="ve-question">How does a neural network actually learn?</div>
+            <div class="ve-mini-sketch">
+              <svg width="250" height="72" viewBox="0 0 250 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- prediction box -->
+                <rect x="4" y="22" width="62" height="28" rx="5" stroke="#2E2A26" stroke-width="1.5" fill="#fff"/>
+                <text x="35" y="40" text-anchor="middle" font-family="Caveat, cursive" font-size="14" fill="#2E2A26">predict</text>
+                <!-- arrow -->
+                <path d="M68 36 H92" stroke="#2E2A26" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M86 31 L93 36 L86 41" stroke="#2E2A26" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <!-- error box -->
+                <rect x="94" y="22" width="56" height="28" rx="5" stroke="#2E2A26" stroke-width="1.5" fill="#fff"/>
+                <text x="122" y="40" text-anchor="middle" font-family="Caveat, cursive" font-size="14" fill="#2E2A26">error</text>
+                <!-- arrow -->
+                <path d="M152 36 H176" stroke="#2E2A26" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M170 31 L177 36 L170 41" stroke="#2E2A26" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <!-- adjust box -->
+                <rect x="178" y="22" width="68" height="28" rx="5" stroke="#5B76B7" stroke-width="1.5" fill="#fff"/>
+                <text x="212" y="40" text-anchor="middle" font-family="Caveat, cursive" font-size="14" fill="#5B76B7">adjust</text>
+                <!-- loop-back arrow (adjust -> predict) -->
+                <path d="M212 22 C212 8, 35 8, 35 20" stroke="#5B76B7" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="3 3"/>
+                <path d="M30 15 L35 21 L41 16" stroke="#5B76B7" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                <text x="125" y="66" text-anchor="middle" font-family="Caveat, cursive" font-size="12" fill="#5B76B7">…and try again</text>
+              </svg>
+            </div>
+            <div class="ve-oneline">Learn from the mistake. Adjust. Try again.</div>
+            <div style="text-align:center;">
+              <span class="ve-explore">Explore <span class="ve-explore-arrow">→</span></span>
+            </div>
+          </div>
+
+          <!-- CLARIFY: Explain it as... -->
+          <div class="lp-card">
+            <span class="lp-card-tag chip-coral">🔍 Clarify</span>
+            <div class="lp-card-title">Worth slowing down here.</div>
+            <div class="explain-as-row">
+              <div class="explain-chip active" data-format="simple" onclick="setExplainFormat('simple', this)">🧠 Simple</div>
+              <div class="explain-chip" data-format="steps" onclick="setExplainFormat('steps', this)">🧩 Step-by-step</div>
+              <div class="explain-chip" data-format="exam" onclick="setExplainFormat('exam', this)">🎯 Exam answer</div>
+              <div class="explain-chip" data-format="real" onclick="setExplainFormat('real', this)">💬 Real-world</div>
+              <div class="explain-chip" data-format="oneliner" onclick="setExplainFormat('oneliner', this)">⚡ One-liner</div>
+            </div>
+            <div class="lp-card-body fade-swap" id="clarifyBody"><b style="color:var(--ink)">Backpropagation</b> &mdash; the network checks how wrong its guess was, then works backward through every layer nudging the weights slightly, so next time it guesses a little better.</div>
+          </div>
+
+          <!-- UNKNOWN -> KNOWN: cycling analogies -->
+          <div class="lp-card">
+            <span class="lp-card-tag chip-sage">🌱 Unknown → Known</span>
+            <div class="lp-card-title" id="analogyTitle">Think of this like a recipe.</div>
+            <div class="lp-card-body fade-swap" id="analogyBody">You taste the food &rarr; notice what's wrong &rarr; adjust the ingredients &rarr; try again. That's basically backpropagation: the model checks its error and nudges its weights to improve the next prediction.</div>
+            <div class="analogy-switch">
+              <div class="analogy-dots" id="analogyDots">
+                <div class="analogy-dot active"></div><div class="analogy-dot"></div><div class="analogy-dot"></div>
+              </div>
+              <div class="analogy-next-btn" onclick="nextAnalogy()">Another analogy <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 6l6 6-6 6"/></svg></div>
+            </div>
+            <span class="why-analogy-toggle" onclick="toggleWhyAnalogy()">Why this analogy works</span>
+            <div class="why-analogy-body" id="whyAnalogyBody">Both are about correction, not starting over: a small, targeted adjustment based on how far off the result was &mdash; not scrapping the whole approach.</div>
+          </div>
+
+          <!-- CONNECTIONS -->
+          <div class="lp-card" onclick="showToast('Refreshing the connection to Gradient Descent')">
+            <span class="lp-card-tag chip-peri">🔗 Connects to something you know</span>
+            <div class="connect-line">
+              <span class="connect-target">Gradient Descent</span>
+            </div>
+            <div class="connect-meta">You learned this in your Optimization session 9 days ago.</div>
+            <div class="mini-cta" style="display:inline-flex;">Refresh the connection &middot; 45 sec</div>
+          </div>
+
+          <div class="lp-card" onclick="goTo('recall')">
+            <span class="lp-card-tag chip-butter">🃏 Quick Recall</span>
+            <div class="lp-recall-row">
+              <div>
+                <div class="lp-card-title" style="margin-bottom:2px;">Today's 4-minute recall</div>
+                <div class="recall-cards-count">5 questions &middot; 3 formats</div>
+              </div>
+              <div class="mini-cta">Start</div>
+            </div>
+          </div>
+
+          <div class="lp-card lp-next-card" onclick="goTo('review')">
+            <span class="lp-card-tag chip-coral">🎯 What to do next</span>
+            <div class="lp-card-title">Give this 4 minutes.</div>
+            <div class="lp-card-body" style="margin-bottom:14px;">Backpropagation is still a little fuzzy from your last two sessions.</div>
+            <button class="btn btn-primary" onclick="event.stopPropagation(); goTo('review')">Start recall</button>
+          </div>
+
+          <!-- EXAM MODE CARD (hidden by default) -->
+          <div class="lp-card exam-card" id="examCard">
+            <span class="lp-card-tag chip-peri">🎯 Exam mode</span>
+            <div class="lp-card-title" style="margin-bottom:10px;">Neural Networks, exam-ready.</div>
+            <div class="exam-row"><div class="exam-row-label">Must know</div><div class="exam-row-body">Backpropagation, activation functions, weight updates.</div></div>
+            <div class="exam-row"><div class="exam-row-label">2-mark</div><div class="exam-row-body">A neural network learns by adjusting weights based on prediction error.</div></div>
+            <div class="exam-row"><div class="exam-row-label">5-mark</div><div class="exam-row-body">Explain the layers (input, hidden, output), how weights determine influence, why activation functions add non-linearity, and how backpropagation corrects errors layer by layer.</div></div>
+            <div class="exam-row"><div class="exam-row-label">Confusion</div><div class="exam-row-body">Students often mix up backpropagation (the correction step) with forward propagation (the prediction step).</div></div>
+            <div class="mini-cta" style="margin-top:12px; display:inline-flex;" onclick="event.stopPropagation(); showToast('Starting 5 exam-style questions')">Quick test &middot; 5 questions</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ============ 6b. VISUAL EXPLAIN CANVAS (full-screen) ============ -->
+      <div class="screen" id="screen-visual">
+        <div class="topbar">
+          <div class="back-btn" onclick="goTo('learningpack')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+          </div>
+          <div class="topbar-title vc-topbar-title">Visual explain</div>
+          <div class="topbar-spacer"></div>
+        </div>
+        <div class="vc-scroll">
+          <div class="vc-concept-title" id="vcConcept">Backpropagation</div>
+          <div class="vc-concept-q" id="vcQuestion">How does a neural network actually learn?</div>
+
+          <!-- Level 2: spatial node map -->
+          <div class="vc-node-map">
+            <svg class="vc-connectors" id="vcConnectors" viewBox="0 0 320 300" preserveAspectRatio="none">
+              <!-- hand-drawn connector lines from center to each node -->
+              <path d="M160 150 Q158 100 160 64" stroke="#d8d2c6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <path d="M160 150 Q100 146 44 132" stroke="#d8d2c6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <path d="M160 150 Q220 146 276 132" stroke="#d8d2c6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <path d="M160 150 Q120 210 92 244" stroke="#d8d2c6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+              <path d="M160 150 Q200 210 228 244" stroke="#d8d2c6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            </svg>
+            <div class="vc-center" id="vcCenter">Backprop</div>
+            <div class="vc-node n-what active" onclick="setVisualMode('what', this)"><span class="vc-node-icon">◇</span><span class="vc-node-label">What</span></div>
+            <div class="vc-node n-how" onclick="setVisualMode('how', this)"><span class="vc-node-icon">⚙</span><span class="vc-node-label">How</span></div>
+            <div class="vc-node n-why" onclick="setVisualMode('why', this)"><span class="vc-node-icon">?</span><span class="vc-node-label">Why</span></div>
+            <div class="vc-node n-when" onclick="setVisualMode('when', this)"><span class="vc-node-icon">◷</span><span class="vc-node-label">When</span></div>
+            <div class="vc-node n-example" onclick="setVisualMode('example', this)"><span class="vc-node-icon">✦</span><span class="vc-node-label">Example</span></div>
+          </div>
+          <div class="vc-hint-hand" id="vcHint">Pick a way in.</div>
+
+          <!-- Level 3: lens chips (ways of seeing the same thing) -->
+          <div class="vc-modes" id="vcModes" style="display:none;">
+            <div class="vc-mode-label">See it another way:</div>
+            <div class="vc-mode-chip" data-lens="simple" onclick="setVisualLens('simple', this)">Simple</div>
+            <div class="vc-mode-chip" data-lens="analogy" onclick="setVisualLens('analogy', this)">Analogy</div>
+            <div class="vc-mode-chip" data-lens="steps" onclick="setVisualLens('steps', this)">Step-by-step</div>
+            <div class="vc-mode-chip" data-lens="real" onclick="setVisualLens('real', this)">Real world</div>
+            <div class="vc-mode-chip" data-lens="exam" onclick="setVisualLens('exam', this)">Exam</div>
+            <div class="vc-mode-chip" data-lens="sketch" onclick="setVisualLens('sketch', this)">Visualize it</div>
+          </div>
+
+          <!-- Level 3/4: revealed branch panel (hidden until a branch is opened) -->
+          <div class="vc-panel" id="vcPanel" style="display:none;">
+            <div class="vc-panel-eyebrow" id="vcPanelEyebrow">WHAT</div>
+            <div class="vc-panel-title" id="vcPanelTitle">What is it?</div>
+            <div class="vc-panel-body" id="vcPanelBody"></div>
+          </div>
+
+          <!-- Recall-from-concept (hidden until a branch is opened) -->
+          <div class="vc-recall-cta" id="vcRecallCta" style="display:none;" onclick="recallFromConcept()">
+            <div>
+              <div class="vc-recall-lead">Okay, your turn.</div>
+              <div class="vc-recall-q" id="vcRecallQ">Can you explain this without looking?</div>
+            </div>
+            <div class="vc-recall-go">Recall →</div>
+          </div>
+
+          <!-- Gamification connection: mastery trail (hidden until a branch is opened) -->
+          <div class="vc-trail" id="vcTrail" style="display:none;">
+            <div class="vc-trail-row done"><span class="vc-trail-check">✓</span> Concept explored</div>
+            <div class="vc-trail-row" id="trailAnalogy"><span class="vc-trail-check">✓</span> Saw it another way</div>
+            <div class="vc-trail-row" id="trailRecall"><span class="vc-trail-check">✓</span> Recall attempted</div>
+          </div>
+          <div class="vc-verdict" id="vcVerdict" style="display:none;"></div>
+        </div>
+      </div>
+
+
+      <!-- ============ 7. QUICK RECALL ============ -->
+      <div class="screen" id="screen-recall">
+        <div class="grain"></div>
+        <div class="topbar">
+          <div class="back-btn" onclick="goTo('learningpack')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+          </div>
+          <div class="topbar-title">Quick recall</div>
+          <div class="topbar-spacer"></div>
+        </div>
+
+        <div class="recall-screen">
+          <div class="recall-progress" id="recallProgress"></div>
+
+          <div class="flashcard-zone" style="flex-direction:column;">
+            <div class="recall-format-badge" id="formatBadge">Recall</div>
+
+            <!-- FLASHCARD FORMAT -->
+            <div class="flashcard" id="flashcard" onclick="flipCard()">
+              <div class="flashcard-inner" id="flashcardInner">
+                <div class="flashcard-face flashcard-front">
+                  <div class="fc-eyebrow">QUESTION</div>
+                  <div class="fc-question" id="fcQuestion">Why do neural networks need an activation function?</div>
+                  <div class="fc-hint">Tap to reveal</div>
+                </div>
+                <div class="flashcard-face flashcard-back">
+                  <div class="fc-eyebrow" style="color:#5C7A58;">ANSWER</div>
+                  <div class="fc-answer" id="fcAnswer">Without it, stacking layers would still behave like one linear transformation.</div>
+                  <div class="fc-hint">How'd that feel?</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MCQ FORMAT -->
+            <div class="flashcard" id="mcqCard" style="display:none;">
+              <div class="flashcard-face flashcard-front" style="position:relative;">
+                <div class="fc-question" id="mcqQuestion" style="flex:none; margin-bottom:14px;">What does a weight actually control?</div>
+                <div class="mcq-options" id="mcqOptions"></div>
+              </div>
+            </div>
+
+            <!-- FILL-THE-GAP FORMAT -->
+            <div class="flashcard" id="gapCard" style="display:none;">
+              <div class="flashcard-face flashcard-front" style="position:relative;">
+                <div class="fc-question" id="gapQuestion" style="flex:none;">Backpropagation updates ______ based on error.</div>
+                <input type="text" class="gap-fill-input" id="gapInput" placeholder="Type your answer..." />
+                <button class="btn btn-secondary" style="margin-top:14px;" onclick="checkGap()">Check</button>
+                <div class="fc-hint" id="gapFeedback" style="margin-top:10px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="confidence-row" id="confidenceRow">
+            <div class="conf-btn" onclick="nextCard('didnt')">😅 Didn't know</div>
+            <div class="conf-btn" onclick="nextCard('shaky')">🤔 Shaky</div>
+            <div class="conf-btn" onclick="nextCard('knew')" style="border-color:var(--sage); color:#52704E;">✅ Knew it</div>
+          </div>
+
+          <div class="recall-done" id="recallDone">
+            <div class="recall-done-emoji">🧠</div>
+            <div class="recall-done-title">That stuck.</div>
+            <div class="recall-stat-row">
+              <div class="recall-stat"><div class="recall-stat-num" id="statStrong">4</div><div class="recall-stat-label">STRONG</div></div>
+              <div class="recall-stat"><div class="recall-stat-num" id="statShaky">1</div><div class="recall-stat-label">SHAKY</div></div>
+            </div>
+            <div class="recall-next-line">You improved your recall on <b style="color:var(--ink)">Backpropagation</b>.</div>
+            <div class="recall-next-line">Next revisit: <b style="color:var(--ink)">Friday</b></div>
+            <div class="recall-momentum-line">+1 day of momentum 🔥</div>
+            <button class="btn btn-primary" onclick="goTo('review')" style="margin-top:20px;">Done</button>
+          </div>
+        </div>
+      </div>
+      <!-- ============ 8. REVIEW / NEXT BEST ACTION ============ -->
+      <div class="screen" id="screen-review">
+        <div class="grain"></div>
+        <div class="topbar">
+          <div class="back-btn" onclick="goTo('home')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg>
+          </div>
+          <div class="topbar-title">Review</div>
+          <div class="topbar-spacer"></div>
+        </div>
+
+        <div class="review-scroll">
+          <div class="review-heading">What should I do right now?</div>
+          <div class="review-sub">You've seen this before &mdash; you first ran into it 3 weeks ago.</div>
+
+          <div class="nba-hero">
+            <span class="nba-eyebrow">🎯 Next best action</span>
+            <div class="nba-status">Backpropagation is still a little fuzzy.</div>
+            <div class="nba-action">Give this 4 minutes.</div>
+            <span class="mastery-label-pill shaky" style="margin-bottom:14px; display:inline-block;">Shaky</span>
+
+            <div class="mastery-dims">
+              <div class="mastery-dim-row">
+                <div class="mastery-dim-label">Understanding</div>
+                <div class="mastery-dots">
+                  <div class="mastery-dot filled"></div><div class="mastery-dot filled"></div><div class="mastery-dot filled"></div><div class="mastery-dot filled"></div><div class="mastery-dot"></div>
+                </div>
+              </div>
+              <div class="mastery-dim-row">
+                <div class="mastery-dim-label">Recall</div>
+                <div class="mastery-dots">
+                  <div class="mastery-dot filled"></div><div class="mastery-dot filled"></div><div class="mastery-dot filled"></div><div class="mastery-dot"></div><div class="mastery-dot"></div>
+                </div>
+              </div>
+              <div class="mastery-dim-row">
+                <div class="mastery-dim-label">Application</div>
+                <div class="mastery-dots">
+                  <div class="mastery-dot filled"></div><div class="mastery-dot filled"></div><div class="mastery-dot"></div><div class="mastery-dot"></div><div class="mastery-dot"></div>
+                </div>
+              </div>
+              <div class="mastery-dim-row">
+                <div class="mastery-dim-label">Discrimination</div>
+                <div class="mastery-dots">
+                  <div class="mastery-dot filled"></div><div class="mastery-dot filled"></div><div class="mastery-dot filled"></div><div class="mastery-dot"></div><div class="mastery-dot"></div>
+                </div>
+              </div>
+              <div class="mastery-dim-row">
+                <div class="mastery-dim-label">Retention</div>
+                <div class="mastery-dots">
+                  <div class="mastery-dot filled"></div><div class="mastery-dot filled"></div><div class="mastery-dot"></div><div class="mastery-dot"></div><div class="mastery-dot"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="nba-diagnosis">"You understand the idea. You just need to use it once or twice."</div>
+            <button class="btn btn-primary" onclick="goTo('recall')">Work on this</button>
+          </div>
+
+          <div class="section-label" style="margin-top:24px;">Or, a smaller start</div>
+          <div class="alt-row" onclick="goTo('recall')">
+            <div>
+              <div class="alt-title">Quick recall</div>
+              <div class="alt-time">3 min</div>
+            </div>
+            <div class="alt-go">›</div>
+          </div>
+          <div class="alt-row" onclick="showToast('Opening activation functions review')">
+            <div>
+              <div class="alt-title">Review activation functions</div>
+              <div class="alt-time">5 min</div>
+            </div>
+            <div class="alt-go">›</div>
+          </div>
+
+          <div class="section-label" style="margin-top:24px;">Getting stronger</div>
+          <div class="stronger-row">
+            <div class="stronger-check">✓</div>
+            <div class="stronger-title">Activation functions</div>
+            <span class="mastery-label-pill strong" style="margin-left:auto;">Strong</span>
+          </div>
+          <div class="stronger-row">
+            <div class="stronger-check">✓</div>
+            <div class="stronger-title">Forward propagation</div>
+            <span class="mastery-label-pill mastered" style="margin-left:auto;">Mastered</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SESSIONS (nav destination, lightweight) ============ -->
+      <div class="screen" id="screen-sessions">
+        <div class="grain"></div>
+        <div class="home-header">
+          <div><div class="home-greeting" style="font-size:20px;">Sessions</div></div>
+        </div>
+        <div class="home-scroll">
+          <div class="section-label">All sessions</div>
+          <div class="session-list">
+            <div class="session-row" onclick="goTo('learningpack')">
+              <div class="session-icon" style="background:var(--peri-tint);">🧠</div>
+              <div><div class="session-title">Neural Networks</div><div class="session-sub">Today &middot; 47 min</div></div>
+              <div class="session-chev">›</div>
+            </div>
+            <div class="session-row" onclick="showToast('Opening Database Normalization')">
+              <div class="session-icon" style="background:var(--sage-tint);">🗂️</div>
+              <div><div class="session-title">Database Normalization</div><div class="session-sub">Yesterday &middot; 38 min</div></div>
+              <div class="session-chev">›</div>
+            </div>
+            <div class="session-row" onclick="showToast('Opening Computer Networks')">
+              <div class="session-icon" style="background:var(--butter-tint);">🌐</div>
+              <div><div class="session-title">Computer Networks</div><div class="session-sub">Monday &middot; 52 min</div></div>
+              <div class="session-chev">›</div>
+            </div>
+            <div class="session-row" onclick="showToast('Opening Operating Systems')">
+              <div class="session-icon" style="background:var(--coral-tint);">⚙️</div>
+              <div><div class="session-title">Operating Systems</div><div class="session-sub">Last week &middot; 41 min</div></div>
+              <div class="session-chev">›</div>
+            </div>
+          </div>
+        </div>
+        <div class="fab" onclick="goTo('startsession')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Start a session
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item" data-nav="home" onclick="switchNav('home')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home
+          </div>
+          <div class="nav-item active" data-nav="sessions" onclick="switchNav('sessions')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16"/></svg>Sessions
+          </div>
+          <div class="nav-item" data-nav="review" onclick="switchNav('review')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>Review
+          </div>
+          <div class="nav-item" data-nav="profile" onclick="switchNav('profile')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Profile
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ PROFILE (nav destination, lightweight) ============ -->
+      <div class="screen" id="screen-profile">
+        <div class="grain"></div>
+        <div class="home-header">
+          <div><div class="home-greeting" style="font-size:20px;">Profile</div></div>
+        </div>
+        <div class="home-scroll">
+          <div class="lp-card" style="text-align:center; padding:28px 20px;">
+            <div style="width:64px;height:64px;border-radius:50%;background:var(--peri-tint);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px;">👩‍🎓</div>
+            <div class="lp-card-title" style="margin-bottom:2px;">Manasi</div>
+            <div style="font-size:12.5px;color:var(--ink-faint);">Free plan &middot; 14 sessions captured</div>
+          </div>
+          <div class="section-label">Settings</div>
+          <div class="session-row" onclick="showToast('Personalization settings')">
+            <div class="session-icon" style="background:var(--butter-tint);">🎨</div>
+            <div><div class="session-title">Personalization</div><div class="session-sub">Theme, handwriting accent</div></div>
+            <div class="session-chev">›</div>
+          </div>
+          <div class="session-row" onclick="showToast('Privacy dashboard')">
+            <div class="session-icon" style="background:var(--sage-tint);">🔒</div>
+            <div><div class="session-title">Privacy</div><div class="session-sub">What's stored, and for how long</div></div>
+            <div class="session-chev">›</div>
+          </div>
+          <div class="session-row" onclick="showToast('Subscription details')">
+            <div class="session-icon" style="background:var(--coral-tint);">✨</div>
+            <div><div class="session-title">Upgrade to Pro</div><div class="session-sub">Full Mastery Model &amp; memory</div></div>
+            <div class="session-chev">›</div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item" data-nav="home" onclick="switchNav('home')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>Home
+          </div>
+          <div class="nav-item" data-nav="sessions" onclick="switchNav('sessions')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16"/></svg>Sessions
+          </div>
+          <div class="nav-item" data-nav="review" onclick="switchNav('review')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>Review
+          </div>
+          <div class="nav-item active" data-nav="profile" onclick="switchNav('profile')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Profile
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+  // ---------- SCREEN NAVIGATION ----------
+  let currentScreen = 'onboarding';
+  function goTo(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    currentScreen = name;
+    const wrap = document.getElementById('screen-' + name);
+    if (wrap) wrap.scrollTop = 0;
+
+    if (name === 'recording') startRecordingAnim();
+    if (name === 'processing') startProcessing();
+    if (name === 'recall') resetRecall();
+  }
+
+  function switchNav(name) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('[data-nav="' + name + '"]').forEach(n => n.classList.add('active'));
+    goTo(name);
+  }
+
+  // ---------- TOAST ----------
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1700);
+  }
+
+  // ---------- ONBOARDING ----------
+  let onbIndex = 0;
+  function onbNext() {
+    onbIndex++;
+    if (onbIndex >= 3) { goTo('home'); return; }
+    document.getElementById('onbTrack').style.transform = 'translateX(-' + (onbIndex * 100) + '%)';
+    document.querySelectorAll('.onb-dot').forEach((d, i) => d.classList.toggle('active', i === onbIndex));
+    document.getElementById('onbBtn').textContent = onbIndex === 2 ? 'Get started' : 'Continue';
+  }
+
+  // ---------- RECORDING ----------
+  let recInterval, recSeconds = 767; // start at 12:47 to feel "already in progress"
+  function startRecordingAnim() {
+    const wf = document.getElementById('waveform');
+    if (!wf.hasChildNodes()) {
+      for (let i = 0; i < 28; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'wave-bar';
+        const h = 14 + Math.random() * 46;
+        bar.style.height = h + 'px';
+        bar.style.animationDelay = (Math.random() * 1.2) + 's';
+        bar.style.animationDuration = (0.9 + Math.random() * 0.8) + 's';
+        wf.appendChild(bar);
+      }
+    }
+    clearInterval(recInterval);
+    updateTimer();
+    recInterval = setInterval(() => {
+      recSeconds++;
+      updateTimer();
+    }, 1000);
+  }
+  function updateTimer() {
+    const h = Math.floor(recSeconds / 3600);
+    const m = Math.floor((recSeconds % 3600) / 60);
+    const s = recSeconds % 60;
+    document.getElementById('recTimer').textContent =
+      [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+  }
+  function tagConfirm(el, msg) {
+    const confirm = el.querySelector('.tag-confirm');
+    confirm.textContent = msg;
+    confirm.classList.add('show');
+    setTimeout(() => confirm.classList.remove('show'), 1100);
+  }
+  function finishRecording() {
+    clearInterval(recInterval);
+    goTo('processing');
+  }
+
+  // ---------- PROCESSING ----------
+  function startProcessing() {
+    const msgs = [
+      'Making sense of what you just heard.',
+      'Pulling out the important bits.',
+      'Almost ready.'
+    ];
+    let i = 0;
+    const el = document.getElementById('procText');
+    el.textContent = msgs[0];
+    const interval = setInterval(() => {
+      i++;
+      if (i >= msgs.length) { clearInterval(interval); return; }
+      el.style.opacity = 0;
+      setTimeout(() => { el.textContent = msgs[i]; el.style.opacity = 1; }, 220);
+    }, 700);
+    setTimeout(() => { goTo('learningpack'); }, 2300);
+  }
+
+  // ---------- QUICK RECALL (mixed formats) ----------
+  const recallCards = [
+    { format: 'flashcard', q: "Why do neural networks need an activation function?", a: "Without it, stacking layers would still behave like one linear transformation." },
+    { format: 'mcq', q: "What does a weight actually control?", options: ["The number of layers in the network", "How much influence one input has on the output", "How fast the model trains", "The size of the training data"], correct: 1 },
+    { format: 'flashcard', q: "What is backpropagation, in one line?", a: "Working backward from the error to nudge every weight slightly toward a better guess." },
+    { format: 'gap', q: "Backpropagation updates ______ based on error.", answer: "weights" },
+    { format: 'flashcard', q: "What happens if weights are never updated?", a: "The network keeps making the same guesses — it never actually learns anything." }
+  ];
+  let recallIndex = 0;
+  let recallResults = []; // 'knew' | 'shaky' | 'didnt' per card
+  function resetRecall() {
+    recallIndex = 0;
+    recallResults = [];
+    document.getElementById('recallDone').classList.remove('show');
+    renderRecallProgress();
+    loadCard();
+  }
+  function renderRecallProgress() {
+    const wrap = document.getElementById('recallProgress');
+    wrap.innerHTML = '';
+    recallCards.forEach((_, i) => {
+      const seg = document.createElement('div');
+      seg.className = 'recall-progress-seg' + (i < recallIndex ? ' done' : (i === recallIndex ? ' current' : ''));
+      wrap.appendChild(seg);
+    });
+  }
+  function loadCard() {
+    const card = recallCards[recallIndex];
+    // hide all format surfaces, then show the one this card needs
+    document.getElementById('flashcard').style.display = 'none';
+    document.getElementById('mcqCard').style.display = 'none';
+    document.getElementById('gapCard').style.display = 'none';
+    document.getElementById('confidenceRow').classList.remove('show');
+
+    const badge = document.getElementById('formatBadge');
+    if (card.format === 'flashcard') {
+      badge.textContent = 'Recall';
+      document.getElementById('flashcard').style.display = 'block';
+      document.getElementById('flashcard').classList.remove('flipped');
+      document.getElementById('fcQuestion').textContent = card.q;
+      document.getElementById('fcAnswer').textContent = card.a;
+    } else if (card.format === 'mcq') {
+      badge.textContent = 'Multiple choice';
+      document.getElementById('mcqCard').style.display = 'block';
+      document.getElementById('mcqQuestion').textContent = card.q;
+      const opts = document.getElementById('mcqOptions');
+      opts.innerHTML = '';
+      card.options.forEach((opt, i) => {
+        const btn = document.createElement('div');
+        btn.className = 'mcq-option';
+        btn.textContent = opt;
+        btn.onclick = () => selectMcq(i, card.correct, btn);
+        opts.appendChild(btn);
+      });
+    } else if (card.format === 'gap') {
+      badge.textContent = 'Fill the gap';
+      document.getElementById('gapCard').style.display = 'block';
+      document.getElementById('gapQuestion').textContent = card.q;
+      document.getElementById('gapInput').value = '';
+      document.getElementById('gapFeedback').textContent = '';
+      document.getElementById('gapInput').disabled = false;
+    }
+    renderRecallProgress();
+  }
+  function flipCard() {
+    const fc = document.getElementById('flashcard');
+    fc.classList.toggle('flipped');
+    if (fc.classList.contains('flipped')) {
+      setTimeout(() => document.getElementById('confidenceRow').classList.add('show'), 200);
+    } else {
+      document.getElementById('confidenceRow').classList.remove('show');
+    }
+  }
+  function selectMcq(chosenIndex, correctIndex, btnEl) {
+    const opts = document.querySelectorAll('#mcqOptions .mcq-option');
+    opts.forEach(o => o.onclick = null);
+    if (chosenIndex === correctIndex) {
+      btnEl.classList.add('correct');
+    } else {
+      btnEl.classList.add('incorrect');
+      opts[correctIndex].classList.add('correct');
+    }
+    setTimeout(() => document.getElementById('confidenceRow').classList.add('show'), 350);
+  }
+  function checkGap() {
+    const val = document.getElementById('gapInput').value.trim().toLowerCase();
+    const card = recallCards[recallIndex];
+    const feedback = document.getElementById('gapFeedback');
+    if (val === card.answer.toLowerCase()) {
+      feedback.textContent = "That's it.";
+      feedback.style.color = 'var(--sage)';
+    } else {
+      feedback.textContent = 'Close — it was "' + card.answer + '".';
+      feedback.style.color = 'var(--coral-deep)';
+    }
+    document.getElementById('gapInput').disabled = true;
+    document.getElementById('confidenceRow').classList.add('show');
+  }
+  function nextCard(result) {
+    if (result) recallResults.push(result);
+    recallIndex++;
+    if (recallIndex >= recallCards.length) {
+      document.getElementById('flashcard').style.display = 'none';
+      document.getElementById('mcqCard').style.display = 'none';
+      document.getElementById('gapCard').style.display = 'none';
+      document.getElementById('confidenceRow').classList.remove('show');
+      showRecallSummary();
+      document.getElementById('recallDone').classList.add('show');
+      return;
+    }
+    loadCard();
+  }
+  function showRecallSummary() {
+    const strong = recallResults.filter(r => r === 'knew').length;
+    const shaky = recallResults.length - strong;
+    document.getElementById('statStrong').textContent = strong;
+    document.getElementById('statShaky').textContent = shaky;
+  }
+
+  // ---------- LEARNING PACK: SUMMARY LENGTH (Quick / Short / Deep) ----------
+  const summaryContent = {
+    quick: "Neural networks learn by adjusting weights based on errors.",
+    short: "A neural network is just layers of simple decisions stacked together. Each layer takes the last one's output, weighs it, and passes along only what matters — until the final layer makes a call.",
+    deep: "A neural network is a stack of layers, each made of neurons that take weighted inputs, pass them through an activation function, and forward the result. Training means running an input through, comparing the output to the correct answer, and using backpropagation to nudge every weight slightly toward a better guess. Repeat this thousands of times and the weights converge on values that generalize — the network isn't memorizing, it's finding a pattern robust enough to hold on data it hasn't seen."
+  };
+  function setSummaryLength(mode) {
+    ['quick', 'short', 'deep'].forEach(m => document.getElementById('seg' + m[0].toUpperCase() + m.slice(1)).classList.toggle('active', m === mode));
+    const body = document.getElementById('understandBody');
+    body.classList.remove('fade-swap');
+    void body.offsetWidth; // restart animation
+    body.classList.add('fade-swap');
+    body.textContent = summaryContent[mode];
+  }
+
+  // ---------- LEARNING PACK: EXPLAIN IT AS... ----------
+  const explainContent = {
+    simple: "Backpropagation — the network checks how wrong its guess was, then works backward through every layer nudging the weights slightly, so next time it guesses a little better.",
+    steps: "1) Make a prediction. 2) Compare it to the correct answer to get an error. 3) Work backward through each layer, figuring out how much that layer contributed to the error. 4) Nudge that layer's weights slightly to reduce it. 5) Repeat on the next example.",
+    exam: "Backpropagation is the algorithm that computes the gradient of the loss function with respect to each weight, propagating the error backward from the output layer to the input layer, allowing weights to be updated via gradient descent.",
+    real: "It's like a sports coach reviewing game footage: see what went wrong, figure out which specific decision caused it, and adjust just that part of the strategy before the next game.",
+    oneliner: "Backpropagation is how the network learns from its mistakes."
+  };
+  function setExplainFormat(format, chipEl) {
+    document.querySelectorAll('.explain-chip').forEach(c => c.classList.remove('active'));
+    chipEl.classList.add('active');
+    const body = document.getElementById('clarifyBody');
+    body.classList.remove('fade-swap');
+    void body.offsetWidth;
+    body.classList.add('fade-swap');
+    body.innerHTML = explainContent[format];
+  }
+
+  // ---------- LEARNING PACK: CYCLING ANALOGIES ----------
+  const analogies = [
+    { title: "Think of this like a recipe.", body: "You taste the food → notice what's wrong → adjust the ingredients → try again. That's basically backpropagation: the model checks its error and nudges its weights to improve the next prediction.", why: "Both are about correction, not starting over: a small, targeted adjustment based on how far off the result was — not scrapping the whole approach." },
+    { title: "Think of this like a coach after a bad game.", body: "The coach doesn't rebuild the whole team overnight — they review what went wrong, pinpoint specific plays, and adjust those. Backpropagation does the same: it finds which weights contributed most to the error and adjusts those first.", why: "Both target the specific source of the error rather than making sweeping, undirected changes." },
+    { title: "Think of this like GPS recalculating.", body: "Miss a turn, and GPS doesn't restart the whole trip — it recalculates from where you are now. Backpropagation recalculates the network's \"route\" (its weights) based on how far off the current prediction was.", why: "Both correct course incrementally from the current error, not from scratch." }
+  ];
+  let analogyIndex = 0;
+  function nextAnalogy() {
+    analogyIndex = (analogyIndex + 1) % analogies.length;
+    const a = analogies[analogyIndex];
+    const titleEl = document.getElementById('analogyTitle');
+    const bodyEl = document.getElementById('analogyBody');
+    [titleEl, bodyEl].forEach(el => { el.classList.remove('fade-swap'); void el.offsetWidth; el.classList.add('fade-swap'); });
+    titleEl.textContent = a.title;
+    bodyEl.textContent = a.body;
+    document.getElementById('whyAnalogyBody').textContent = a.why;
+    document.querySelectorAll('#analogyDots .analogy-dot').forEach((d, i) => d.classList.toggle('active', i === analogyIndex));
+  }
+  function toggleWhyAnalogy() {
+    document.getElementById('whyAnalogyBody').classList.toggle('show');
+  }
+
+  // ---------- VISUAL EXPLAIN ----------
+  // Data-driven so the AI engine can later generate this per concept from a transcript.
+  // Each concept declares its central question, its What/How/Why/When/Example content,
+  // multiple explanatory "lenses" for the same idea, an optional sketch, and a recall prompt.
+  const visualConcepts = {
+    backprop: {
+      concept: "Backpropagation",
+      short: "Backprop",
+      question: "How does a neural network actually learn?",
+      recall: "Now — without looking, how does the network improve?",
+      modes: {
+        what: {
+          intro: "Backpropagation is the process that lets a neural network learn from its mistakes.",
+          keyPoint: "Make a prediction → see the mistake → adjust.",
+          flow: ["prediction", "error", "adjust weights"],
+          simple: "The network guesses, checks how far off it was, and quietly fixes the parts most responsible.",
+          technical: "It computes the gradient of the loss with respect to each weight and updates them to reduce error."
+        },
+        how: {
+          intro: "It traces the error backward through the network to find what to fix.",
+          steps: [
+            { label: "Make a prediction", detail: "The network runs the input forward and produces its best guess." },
+            { label: "Calculate the error", detail: "Compare the guess to the correct answer to measure how wrong it was." },
+            { label: "Send the error backward", detail: "Instead of changing everything, trace the error back through the layers to see who contributed." },
+            { label: "Find which weights caused it", detail: "Each weight gets a share of the blame, proportional to its effect on the error." },
+            { label: "Adjust the weights", detail: "Nudge each weight a little in the direction that would have reduced the error." }
+          ],
+          repeat: true
+        },
+        why: {
+          intro: "Without backpropagation, the network has no efficient way to turn mistakes into better predictions.",
+          reasons: ["Learns from its own errors", "Improves predictions over time", "Makes deep networks actually trainable"],
+          without: "Guesses stay random. The same mistakes repeat forever.",
+          with: "Every mistake becomes a small, targeted correction."
+        },
+        when: {
+          intro: "When would you actually encounter this?",
+          situations: [
+            { icon: "🖼️", label: "Image recognition" },
+            { icon: "💬", label: "Language models" },
+            { icon: "🎯", label: "Recommendation systems" },
+            { icon: "🎙️", label: "Speech recognition" }
+          ]
+        },
+        example: {
+          title: "Spam filter",
+          flow: [
+            { line: "Email arrives", tone: "ink" },
+            { line: "Model predicts: \u201cnot spam\u201d", tone: "ink" },
+            { line: "Actually: SPAM", tone: "blue" },
+            { line: "Error measured", tone: "ink" },
+            { line: "Weights adjusted", tone: "blue" },
+            { line: "Next prediction improves", tone: "ink" }
+          ],
+          takeaway: "That's backpropagation in the wild."
+        }
+      },
+      lenses: {
+        simple: { title: "Simple", body: "The network makes a guess, sees how far off it was, and walks that mistake backward to fix the parts most responsible for it." },
+        analogy: { title: "Analogy", body: "Like a coach reviewing game footage: don't rebuild the team — find the specific plays that lost the game and adjust just those." },
+        steps: { title: "Step-by-step", steps: ["Make a prediction", "Measure the error", "Send the error backward through the layers", "Nudge each weight toward a better answer", "Repeat on the next example"] },
+        real: { title: "Real world", body: "Every model you've used — autocomplete, face unlock, product recommendations — was trained this way, one corrected mistake at a time." },
+        exam: { title: "Exam", body: "Backpropagation computes the gradient of the loss function with respect to each weight by propagating error backward from the output layer, enabling weight updates via gradient descent." },
+        sketch: { title: "Visualize it", type: "loop" }
+      }
+    },
+    gradient: {
+      concept: "Gradient Descent",
+      short: "Descent",
+      question: "How does a model find the best answer?",
+      recall: "Without looking — how does gradient descent get to the bottom?",
+      modes: {
+        what: {
+          intro: "Gradient descent is a method for finding the lowest point of an error curve by taking small downhill steps.",
+          keyPoint: "Check the slope → step downhill → repeat.",
+          flow: ["measure error", "find downhill", "small step"],
+          simple: "Feel which way slopes down, take a small step, and repeat until the ground is flat.",
+          technical: "It updates parameters in the direction of the negative gradient of the loss, scaled by a learning rate."
+        },
+        how: {
+          intro: "It repeatedly moves in whichever direction reduces the error most.",
+          steps: [
+            { label: "Make a prediction", detail: "Start from the current parameter settings and produce an output." },
+            { label: "Measure the error", detail: "This is the 'height' on the error curve — how far from the target you are." },
+            { label: "Find the downhill direction", detail: "The gradient points uphill, so you step the opposite way." },
+            { label: "Take a small step", detail: "The learning rate controls how big each step is — too big overshoots, too small crawls." },
+            { label: "Repeat until flat", detail: "When the ground stops sloping, you've reached a minimum." }
+          ],
+          repeat: true
+        },
+        why: {
+          intro: "It's how a model turns 'this is wrong' into 'here's a better setting' — without trying every possibility.",
+          reasons: ["Finds good settings efficiently", "Scales to millions of parameters", "Powers almost all model training"],
+          without: "You'd have to test every possible setting — impossible at scale.",
+          with: "You follow the slope straight toward a good answer."
+        },
+        when: {
+          intro: "When would you actually encounter this?",
+          situations: [
+            { icon: "🧠", label: "Training any neural net" },
+            { icon: "📈", label: "Economics optimization" },
+            { icon: "🛣️", label: "Route planning" },
+            { icon: "⚙️", label: "Engineering tuning" }
+          ]
+        },
+        example: {
+          title: "Tuning a thermostat",
+          flow: [
+            { line: "Room feels too hot", tone: "ink" },
+            { line: "Nudge the dial down a little", tone: "blue" },
+            { line: "Still slightly warm", tone: "ink" },
+            { line: "Nudge down again, smaller", tone: "blue" },
+            { line: "Comfortable — stop", tone: "ink" }
+          ],
+          takeaway: "Small steps toward the target — that's gradient descent."
+        }
+      },
+      lenses: {
+        simple: { title: "Simple", body: "Imagine standing on a hill in fog. You feel which way slopes down and take a small step. Repeat, and you reach the valley." },
+        analogy: { title: "Analogy", body: "Like adjusting a volume knob until the music sounds right — small changes based on how far you are from the target." },
+        steps: { title: "Step-by-step", steps: ["Make a prediction", "Measure the error (the 'height')", "Find the downhill direction (the gradient)", "Take a small step that way", "Repeat until the ground is flat"] },
+        real: { title: "Real world", body: "Route optimization, portfolio balancing, and training every neural network all lean on this same downhill-stepping idea." },
+        exam: { title: "Exam", body: "Gradient descent is an iterative optimization algorithm that minimizes a loss function by updating parameters in the direction of the negative gradient, scaled by a learning rate." },
+        sketch: { title: "Visualize it", type: "hill" }
+      }
+    },
+    binarysearch: {
+      concept: "Binary Search",
+      short: "Binary search",
+      question: "How do you find something fast in a sorted list?",
+      recall: "Without looking — why does binary search halve the work each time?",
+      modes: {
+        what: {
+          intro: "Binary search finds an item in a sorted list by repeatedly cutting the search space in half.",
+          keyPoint: "Check the middle → discard half → repeat.",
+          flow: ["check middle", "discard a half", "repeat"],
+          simple: "Look at the middle, throw away the half your answer can't be in, and keep halving until you land on it.",
+          technical: "A divide-and-conquer algorithm with O(log n) time complexity over a sorted array."
+        },
+        how: {
+          intro: "Each check throws away half of what's left.",
+          steps: [
+            { label: "Look at the middle item", detail: "Jump straight to the midpoint of the current range." },
+            { label: "If it matches, you're done", detail: "The middle is the target — search ends immediately." },
+            { label: "If target is smaller, keep the left half", detail: "Everything to the right is too big, so discard it." },
+            { label: "If larger, keep the right half", detail: "Everything to the left is too small, so discard it." },
+            { label: "Repeat on the half that remains", detail: "The range shrinks by half every single step." }
+          ],
+          repeat: true
+        },
+        why: {
+          intro: "It turns a search of a million items into about 20 checks instead of a million.",
+          reasons: ["Massive speed-up on large data", "Scales logarithmically, not linearly", "Foundation of fast lookups"],
+          without: "You'd scan every item one by one — slow on big lists.",
+          with: "You halve the problem with every single check."
+        },
+        when: {
+          intro: "When would you actually encounter this?",
+          situations: [
+            { icon: "📖", label: "Dictionary lookups" },
+            { icon: "🗄️", label: "Database indexes" },
+            { icon: "⌨️", label: "Autocomplete" },
+            { icon: "🔀", label: "git bisect" }
+          ]
+        },
+        example: {
+          title: "Guess the number (1–100)",
+          flow: [
+            { line: "Guess 50", tone: "ink" },
+            { line: "\u201cHigher\u201d — ignore 1–50", tone: "blue" },
+            { line: "Guess 75", tone: "ink" },
+            { line: "\u201cLower\u201d — ignore 76–100", tone: "blue" },
+            { line: "Closing in fast…", tone: "ink" }
+          ],
+          takeaway: "Each guess halves what's left — that's binary search."
+        }
+      },
+      lenses: {
+        simple: { title: "Simple", body: "Always look at the middle. Then throw away the half you know your answer isn't in. Keep halving until you land on it." },
+        analogy: { title: "Analogy", body: "Like finding a word in a physical dictionary: you don't start at page one — you open near the middle and jump halves." },
+        steps: { title: "Step-by-step", steps: ["Look at the middle item", "If it matches, done", "If your target is smaller, keep the left half", "If larger, keep the right half", "Repeat on the half that remains"] },
+        real: { title: "Real world", body: "Databases use it to find rows instantly; git bisect uses it to pinpoint the commit that broke your build." },
+        exam: { title: "Exam", body: "Binary search is a divide-and-conquer algorithm with O(log n) time complexity that locates a target in a sorted array by repeatedly halving the search interval." },
+        sketch: { title: "Visualize it", type: "halving" }
+      }
+    }
+  };
+
+  let currentConcept = 'backprop';
+  let currentNode = null;      // null = collapsed, map only ("pick a way in")
+  let currentLens = null;      // lens only applies once a branch is open
+  let sawAnotherWay = false;
+  let branchesOpened = {};     // track which branches the student has opened
+
+
+  function openVisual(key) {
+    currentConcept = key;
+    currentNode = null;       // start collapsed — map only
+    currentLens = null;
+    sawAnotherWay = false;
+    branchesOpened = {};
+    const c = visualConcepts[key];
+    document.getElementById('vcConcept').textContent = c.concept;
+    document.getElementById('vcQuestion').textContent = c.question;
+    document.getElementById('vcCenter').textContent = c.short.replace('\n', ' ');
+    document.getElementById('vcRecallQ').textContent = c.recall;
+    // reset node active states (none active until user picks)
+    document.querySelectorAll('#screen-visual .vc-node').forEach(n => n.classList.remove('active'));
+    // collapse the branch content + lens row + recall + trail
+    document.getElementById('vcPanel').style.display = 'none';
+    document.getElementById('vcModes').style.display = 'none';
+    document.getElementById('vcRecallCta').style.display = 'none';
+    document.getElementById('vcTrail').style.display = 'none';
+    document.getElementById('vcVerdict').style.display = 'none';
+    document.getElementById('vcHint').textContent = 'Pick a way in.';
+    // reset trail state
+    document.getElementById('trailAnalogy').classList.remove('done');
+    document.getElementById('trailRecall').classList.remove('done');
+    document.getElementById('trailWhat') && document.getElementById('trailWhat').classList.remove('done');
+    goTo('visual');
+  }
+
+  function setVisualMode(node, el) {
+    const firstOpen = (currentNode === null);
+    currentNode = node;
+    currentLens = null; // opening a branch resets to its native content, not a lens
+    branchesOpened[node] = true;
+    document.querySelectorAll('#screen-visual .vc-node').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+
+    // reveal the branch surfaces the first time any node is opened
+    document.getElementById('vcPanel').style.display = 'block';
+    document.getElementById('vcModes').style.display = 'flex';
+    document.getElementById('vcRecallCta').style.display = 'flex';
+    document.getElementById('vcTrail').style.display = 'flex';
+    document.getElementById('vcVerdict').style.display = 'block';
+    document.getElementById('vcHint').textContent = 'Tap another direction anytime →';
+    // reset lens chips to none-active (branch shows its own native content first)
+    document.querySelectorAll('#vcModes .vc-mode-chip').forEach(m => m.classList.remove('active'));
+
+    renderBranch();
+    updateVerdict();
+
+    // scroll the panel into focus on first open (subtle)
+    if (firstOpen) {
+      setTimeout(() => document.getElementById('vcPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+    }
+  }
+
+  function setVisualLens(lens, el) {
+    currentLens = lens;
+    document.querySelectorAll('#vcModes .vc-mode-chip').forEach(m => m.classList.remove('active'));
+    el.classList.add('active');
+    if (lens === 'analogy' || lens === 'sketch') {
+      sawAnotherWay = true;
+      document.getElementById('trailAnalogy').classList.add('done');
+      updateVerdict();
+    }
+    renderBranch();
+  }
+
+  // Render the panel content — branch-specific structure, then optional lens reframing
+  function renderBranch() {
+    const c = visualConcepts[currentConcept];
+    const m = c.modes[currentNode];
+    const panel = document.getElementById('vcPanel');
+    const eyebrow = document.getElementById('vcPanelEyebrow');
+    const titleEl = document.getElementById('vcPanelTitle');
+    const body = document.getElementById('vcPanelBody');
+
+    // restart the subtle expand/fade
+    panel.classList.remove('vc-panel');
+    void panel.offsetWidth;
+    panel.classList.add('vc-panel');
+
+    const nodeTitles = { what: 'What is it?', how: 'How does it work?', why: 'Why does it matter?', when: 'When do you use it?', example: 'See it in action' };
+    titleEl.textContent = nodeTitles[currentNode];
+
+    // If a lens is active, that reframes the concept beneath the branch title
+    if (currentLens) {
+      eyebrow.textContent = currentNode.toUpperCase() + ' · ' + c.lenses[currentLens].title.toUpperCase();
+      body.innerHTML = renderLens(c, m);
+      return;
+    }
+
+    // Otherwise render the branch's own native, structured content
+    eyebrow.textContent = currentNode.toUpperCase();
+    if (currentNode === 'what') body.innerHTML = renderWhat(m);
+    else if (currentNode === 'how') body.innerHTML = renderHow(m);
+    else if (currentNode === 'why') body.innerHTML = renderWhy(m);
+    else if (currentNode === 'when') body.innerHTML = renderWhen(m);
+    else if (currentNode === 'example') body.innerHTML = renderExample(m);
+  }
+
+  // ---- branch-specific renderers (each looks different on purpose) ----
+  function renderWhat(m) {
+    const flowBoxes = m.flow.map((f, i) =>
+      '<div class="wf-box' + (i === m.flow.length - 1 ? ' wf-box-blue' : '') + '">' + f + '</div>' +
+      (i < m.flow.length - 1 ? '<div class="wf-arrow">↓</div>' : '')
+    ).join('');
+    return '<div class="vc-lead">' + m.intro + '</div>' +
+      '<div class="what-flow">' + flowBoxes + '</div>' +
+      '<div class="vc-oneliner"><span class="vc-oneliner-tag">In one line</span> \u201c' + m.keyPoint + '\u201d</div>' +
+      '<div class="vc-depth-row">' +
+        '<button class="vc-depth-btn" onclick="showDepth(\'simple\', this)">Explain simply</button>' +
+        '<button class="vc-depth-btn" onclick="showDepth(\'technical\', this)">Technical definition</button>' +
+      '</div>' +
+      '<div class="vc-depth-out" id="vcDepthOut"></div>';
+  }
+  function showDepth(which, btn) {
+    const m = visualConcepts[currentConcept].modes.what;
+    document.querySelectorAll('.vc-depth-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const out = document.getElementById('vcDepthOut');
+    out.classList.remove('vc-depth-out-show'); void out.offsetWidth; out.classList.add('vc-depth-out-show');
+    out.textContent = which === 'simple' ? m.simple : m.technical;
+  }
+  function renderHow(m) {
+    const steps = m.steps.map((s, i) =>
+      '<div class="how-step" onclick="toggleHowStep(this)">' +
+        '<div class="how-step-head"><span class="how-step-num">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<span class="how-step-label">' + s.label + '</span><span class="how-step-caret">＋</span></div>' +
+        '<div class="how-step-detail">' + s.detail + '</div>' +
+      '</div>' +
+      (i < m.steps.length - 1 ? '<div class="how-connector">↓</div>' : '')
+    ).join('');
+    const repeat = m.repeat ? '<div class="how-repeat">↺ repeat</div>' : '';
+    return '<div class="vc-lead">' + m.intro + '</div>' +
+      '<div class="how-flow">' + steps + repeat + '</div>' +
+      '<div class="vc-tiny-hint">tap a step to expand it</div>';
+  }
+  function toggleHowStep(el) { el.classList.toggle('open'); }
+  function renderWhy(m) {
+    const reasons = m.reasons.map(r => '<div class="why-reason"><span class="why-arrow">→</span>' + r + '</div>').join('');
+    return '<div class="vc-lead">' + m.intro + '</div>' +
+      '<div class="why-reasons">' + reasons + '</div>' +
+      '<div class="why-compare">' +
+        '<div class="why-col why-without"><div class="why-col-tag">Without it</div>' + m.without + '</div>' +
+        '<div class="why-col why-with"><div class="why-col-tag">With it</div>' + m.with + '</div>' +
+      '</div>';
+  }
+  function renderWhen(m) {
+    const cards = m.situations.map(s =>
+      '<div class="when-card"><span class="when-icon">' + s.icon + '</span><span class="when-label">' + s.label + '</span></div>'
+    ).join('');
+    return '<div class="vc-lead">' + m.intro + '</div>' +
+      '<div class="when-grid">' + cards + '</div>' +
+      '<div class="vc-tiny-hint">think of WHEN as: where would I actually meet this?</div>';
+  }
+  function renderExample(m) {
+    const flow = m.flow.map((f, i) =>
+      '<div class="ex-step ' + (f.tone === 'blue' ? 'ex-blue' : '') + '">' + f.line + '</div>' +
+      (i < m.flow.length - 1 ? '<div class="ex-arrow">↓</div>' : '')
+    ).join('');
+    return '<div class="ex-scenario-tag">' + m.title + '</div>' +
+      '<div class="example-flow">' + flow + '</div>' +
+      '<div class="ex-takeaway">\u201c' + m.takeaway + '\u201d</div>';
+  }
+  // lens reframing (simple / analogy / steps / real / exam / sketch)
+  function renderLens(c, m) {
+    const lens = c.lenses[currentLens];
+    if (lens.steps) {
+      return '<div class="vc-steps">' + lens.steps.map((s, i) =>
+        '<div class="vc-step"><span class="vc-step-num">' + (i + 1) + '</span><span>' + s + '</span></div>').join('') + '</div>';
+    }
+    if (currentLens === 'sketch') {
+      return '<div class="vc-sketch-lead">A page from the sketchbook —</div>' + renderSketch(lens.type);
+    }
+    return '<div class="vc-lens-body">' + lens.body + '</div>';
+  }
+
+  // Hand-drawn sketchnote SVGs (white bg, black ink, muted blue accent)
+  function renderSketch(type) {
+    if (type === 'loop') {
+      return '<div class="vc-sketch-frame"><svg viewBox="0 0 300 150" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<rect x="10" y="55" width="72" height="34" rx="6" stroke="#2E2A26" stroke-width="1.6" fill="#fff"/>' +
+        '<text x="46" y="77" text-anchor="middle" class="sketch-label">predict</text>' +
+        '<path d="M84 72 H116" stroke="#2E2A26" stroke-width="1.6" stroke-linecap="round"/><path d="M109 66 L117 72 L109 78" stroke="#2E2A26" stroke-width="1.6" fill="none"/>' +
+        '<rect x="118" y="55" width="64" height="34" rx="6" stroke="#2E2A26" stroke-width="1.6" fill="#fff"/>' +
+        '<text x="150" y="77" text-anchor="middle" class="sketch-label">error</text>' +
+        '<path d="M184 72 H216" stroke="#2E2A26" stroke-width="1.6" stroke-linecap="round"/><path d="M209 66 L217 72 L209 78" stroke="#2E2A26" stroke-width="1.6" fill="none"/>' +
+        '<rect x="218" y="55" width="72" height="34" rx="6" stroke="#5B76B7" stroke-width="1.6" fill="#fff"/>' +
+        '<text x="254" y="77" text-anchor="middle" class="sketch-label-blue">adjust</text>' +
+        '<path d="M254 55 C254 20, 46 20, 46 52" stroke="#5B76B7" stroke-width="1.6" fill="none" stroke-dasharray="4 3" stroke-linecap="round"/>' +
+        '<path d="M40 46 L46 53 L53 47" stroke="#5B76B7" stroke-width="1.6" fill="none"/>' +
+        '<text x="150" y="30" text-anchor="middle" class="sketch-label-blue">loop back &amp; improve</text>' +
+        '<text x="150" y="120" text-anchor="middle" class="sketch-label">every pass, the guess gets closer</text>' +
+        '</svg></div>';
+    }
+    if (type === 'hill') {
+      return '<div class="vc-sketch-frame"><svg viewBox="0 0 300 160" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M15 30 Q90 40 150 110 Q210 150 285 140" stroke="#2E2A26" stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="45" cy="34" r="7" stroke="#5B76B7" stroke-width="1.6" fill="#fff"/>' +
+        '<circle cx="95" cy="52" r="6" stroke="#5B76B7" stroke-width="1.4" fill="#fff" opacity="0.8"/>' +
+        '<circle cx="135" cy="92" r="5.5" stroke="#5B76B7" stroke-width="1.4" fill="#fff" opacity="0.7"/>' +
+        '<circle cx="175" cy="122" r="6.5" stroke="#5B76B7" stroke-width="1.6" fill="#5B76B7"/>' +
+        '<path d="M52 30 Q70 26 90 46" stroke="#5B76B7" stroke-width="1.3" fill="none" stroke-dasharray="3 3"/>' +
+        '<path d="M100 50 Q118 60 130 86" stroke="#5B76B7" stroke-width="1.3" fill="none" stroke-dasharray="3 3"/>' +
+        '<text x="45" y="20" text-anchor="middle" class="sketch-label">start</text>' +
+        '<text x="200" y="128" class="sketch-label-blue">lowest point</text>' +
+        '<text x="150" y="152" text-anchor="middle" class="sketch-label">small steps, always downhill</text>' +
+        '</svg></div>';
+    }
+    if (type === 'halving') {
+      return '<div class="vc-sketch-frame"><svg viewBox="0 0 300 150" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<g stroke="#2E2A26" stroke-width="1.4" fill="#fff">' +
+        '<rect x="14" y="20" width="24" height="24" rx="4"/><rect x="42" y="20" width="24" height="24" rx="4"/><rect x="70" y="20" width="24" height="24" rx="4"/><rect x="98" y="20" width="24" height="24" rx="4"/><rect x="126" y="20" width="24" height="24" rx="4"/><rect x="154" y="20" width="24" height="24" rx="4"/><rect x="182" y="20" width="24" height="24" rx="4"/><rect x="210" y="20" width="24" height="24" rx="4"/></g>' +
+        '<rect x="126" y="20" width="24" height="24" rx="4" stroke="#5B76B7" stroke-width="2" fill="#fff"/>' +
+        '<text x="138" y="37" text-anchor="middle" class="sketch-label-blue" font-size="13">mid</text>' +
+        '<path d="M138 48 V64" stroke="#5B76B7" stroke-width="1.4" stroke-dasharray="3 3"/>' +
+        '<path d="M14 74 H122" stroke="#c9c2b4" stroke-width="6" stroke-linecap="round"/>' +
+        '<path d="M154 74 H234" stroke="#5B76B7" stroke-width="6" stroke-linecap="round"/>' +
+        '<text x="68" y="94" text-anchor="middle" class="sketch-label">discard half</text>' +
+        '<text x="194" y="94" text-anchor="middle" class="sketch-label-blue">keep this half</text>' +
+        '<text x="150" y="128" text-anchor="middle" class="sketch-label">then halve again… and again</text>' +
+        '</svg></div>';
+    }
+    return '';
+  }
+
+  // Recall from the concept — marks the trail, then uses the EXISTING recall flow
+  function recallFromConcept() {
+    document.getElementById('trailRecall').classList.add('done');
+    updateVerdict();
+    goTo('recall');
+  }
+
+  function updateVerdict() {
+    const recallDone = document.getElementById('trailRecall').classList.contains('done');
+    const exploredCount = Object.keys(branchesOpened).length;
+    const v = document.getElementById('vcVerdict');
+    if (sawAnotherWay && recallDone) v.textContent = "This one's starting to stick.";
+    else if (recallDone) v.textContent = "Good — that's the recall in. Try seeing it another way too.";
+    else if (sawAnotherWay && exploredCount >= 2) v.textContent = "You're getting there — now try recalling it.";
+    else if (sawAnotherWay) v.textContent = "Nice — now try recalling it without looking.";
+    else if (exploredCount >= 2) v.textContent = "Good exploring. Try seeing it another way.";
+    else v.textContent = "Keep going — open another branch or see it another way.";
+  }
+
+  // ---------- LEARNING PACK: EXAM MODE ----------
+  let examModeOn = false;
+  function toggleExamMode() {
+    examModeOn = !examModeOn;
+    document.getElementById('examToggle').classList.toggle('active', examModeOn);
+    document.getElementById('examCard').classList.toggle('show', examModeOn);
+    document.getElementById('lpAnnotation').textContent = examModeOn ? '🎯 Exam view — the essentials, condensed.' : '✏️ Okay, THIS is the important bit.';
+    if (examModeOn) {
+      document.getElementById('examCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  // init
+  updateTimer();
+</script>
+
+</body>
+</html>
